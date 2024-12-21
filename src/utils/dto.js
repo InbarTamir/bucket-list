@@ -2,7 +2,32 @@
 /*            STC DTOs            */
 /* ============================== */
 
-export class Note {
+class SchemaBasedDTO {
+  #schema = {}
+
+  constructor(schema, data = {}, origin = 'client') {
+    this.#schema = schema
+    Object.keys(this.#schema).forEach(key => {
+      const { [origin]: originKey, defaultValue } = this.#schema[key]
+      this[originKey] = data[originKey] ?? defaultValue
+    })
+  }
+
+  toServer() {
+    const serverData = {}
+    Object.keys(this.#schema).forEach(key => {
+      const { server: serverKey, client: clientKey } = this.#schema[key]
+      serverData[serverKey] = this[clientKey]
+    })
+    return serverData
+  }
+
+  static fromServer(data) {
+    return new this(data, 'server')
+  }
+}
+
+export class Note extends SchemaBasedDTO {
   #schema = {
     id: { server: 'id', client: 'id', defaultValue: null },
     description: { server: 'description', client: 'description', defaultValue: '' },
@@ -12,27 +37,11 @@ export class Note {
   }
 
   constructor(note = {}, origin = 'client') {
-    Object.keys(this.#schema).forEach(key => {
-      const { [origin]: originKey, defaultValue } = this.#schema[key]
-      this[originKey] = note[originKey] ?? defaultValue
-    })
-  }
-
-  toServer() {
-    const serverData = {}
-    Object.keys(this.#schema).forEach(key => {
-      const { server: serverKey, client: clientKey } = this.#schema[key]
-      serverData[serverKey] = this[clientKey]
-    })
-    return serverData
-  }
-
-  static fromServer(note) {
-    return new Note(note, 'server')
+    super(this.#schema, note, origin)
   }
 }
 
-export class ActivityRecord {
+export class ActivityRecord extends SchemaBasedDTO {
   #schema = {
     id: { server: 'id', client: 'id', defaultValue: null },
     noteId: { server: 'note_id', client: 'noteId', defaultValue: null },
@@ -42,19 +51,7 @@ export class ActivityRecord {
   }
 
   constructor(record = {}, origin = 'client') {
-    Object.keys(this.#schema).forEach(key => {
-      const { [origin]: originKey, defaultValue } = this.#schema[key]
-      this[originKey] = record[originKey] ?? defaultValue
-    })
-  }
-
-  toServer() {
-    const serverData = {}
-    Object.keys(this.#schema).forEach(key => {
-      const { server: serverKey, client: clientKey } = this.#schema[key]
-      serverData[serverKey] = this[clientKey]
-    })
-    return serverData
+    super(this.#schema, record, origin)
   }
 
   static createFromNote(note = {}) {
@@ -68,7 +65,7 @@ export class ActivityRecord {
   }
 }
 
-export class LabeledBucket {
+export class LabeledBucket extends SchemaBasedDTO {
   #schema = {
     id: { server: 'id', client: 'id', defaultValue: null },
     title: { server: 'title', client: 'title', defaultValue: '' },
@@ -76,30 +73,10 @@ export class LabeledBucket {
   }
 
   constructor(bucket = {}, origin = 'client') {
-    Object.keys(this.#schema).forEach(key => {
-      const { [origin]: originKey, defaultValue } = this.#schema[key]
-      this[originKey] = bucket[originKey] ?? defaultValue
-    })
-  }
-
-  toServer() {
-    const serverData = {}
-    Object.keys(this.#schema).forEach(key => {
-      const { server: serverKey, client: clientKey } = this.#schema[key]
-      serverData[serverKey] = this[clientKey]
-    })
-    return serverData
+    super(this.#schema, bucket, origin)
   }
 }
 
 /* ============================== */
 /*           Client DTOs          */
 /* ============================== */
-
-export class TimeBucket extends LabeledBucket {
-  constructor(data = {}, origin = 'client') {
-    super(data, origin)
-    this.min = data.min ?? 0
-    this.max = data.max ?? 0
-  }
-}
