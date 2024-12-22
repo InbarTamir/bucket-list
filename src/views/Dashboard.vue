@@ -21,15 +21,15 @@
       </div>
     </div>
 
-    <div v-if="inProgressNotes.length" class="in-progress-section">
+    <div v-if="inProgressRecords.length" class="in-progress-section">
       <h2>In Progress</h2>
       <div class="notes-list">
-        <div v-for="note in inProgressNotes" :key="note.id" class="note-item">
+        <div v-for="{ activity, note } in inProgressRecords" :key="note.id" class="note-item">
           <div class="note-info">
             <span class="description">{{ note.description }}</span>
             <span class="label" v-if="note.label">{{ note.label }}</span>
             <span class="time">{{ note.timeEstimation }}m</span>
-            <span class="started-at">Started: {{ Helpers.formatDateTime(note.startedAt) }}</span>
+            <span class="started-at">Started: {{ Helpers.formatDateTime(activity.startedAt) }}</span>
           </div>
           <div class="actions">
             <button @click="finishNote(note)">Finish</button>
@@ -47,7 +47,7 @@
 import { mapGetters, mapState } from 'vuex'
 import Bucket from '../components/Bucket.vue'
 import CreateNoteModal from '../components/CreateNoteModal.vue'
-import Helpers from '../helpers'
+import Helpers from '@/utils/helpers'
 
 export default {
   name: 'Dashboard',
@@ -57,18 +57,19 @@ export default {
   },
   data() {
     return {
+      Helpers,
       showCreateNoteModal: false,
       selectedBucket: null
     }
   },
   computed: {
-    ...mapState(['notes']),
-    ...mapGetters(['visibleTimeBuckets', 'visibleLabeledBuckets', 'inProgressNotes']),
-    timeBuckets() {
-      return this.visibleTimeBuckets
-    },
+    ...mapState(['notes', 'buckets']),
+    ...mapGetters(['inProgressRecords']),
     labeledBuckets() {
-      return this.visibleLabeledBuckets
+      return this.buckets.filter(bucket => bucket.labeled)
+    },
+    timeBuckets() {
+      return this.buckets.filter(bucket => !bucket.labeled)
     }
   },
   methods: {

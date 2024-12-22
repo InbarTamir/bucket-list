@@ -4,23 +4,25 @@
 
     <div class="stats">
       <div class="count">
-        <span class="number">{{ pendingNotes.length }}</span>
+        <span class="number">{{ bucket.stats.pending }}</span>
         <span class="label">Pending</span>
       </div>
       <div class="count">
-        <span class="number">{{ inProgressNotes.length }}</span>
+        <span class="number">{{ bucket.stats.inProgress }}</span>
         <span class="label">In Progress</span>
       </div>
       <div class="count completed">
-        <span class="number">{{ completedNotes.length }}</span>
+        <span class="number">{{ bucket.stats.completed }}</span>
         <span class="label">Completed</span>
       </div>
     </div>
 
     <div class="bucket-actions">
       <button v-if="showAddButton" @click="addNote">Add Note</button>
-      <button class="secondary" @click="randomNote" :disabled="!pendingNotes.length">Random</button>
-      <button class="secondary" @click="pickNote" :disabled="!pendingNotes.length">Pick</button>
+      <template v-if="pendingNotes.length">
+        <button class="secondary" @click="randomNote">Random</button>
+        <button class="secondary" @click="pickNote">Pick</button>
+      </template>
     </div>
 
     <random-note-modal :show="showRandomModal" :bucket="bucket" :notes="pendingNotes" @close="closeRandomModal" @start="startNote" />
@@ -32,6 +34,7 @@
 <script>
 import RandomNoteModal from './RandomNoteModal.vue'
 import PickNoteModal from './PickNoteModal.vue'
+import { BucketModel } from '@/utils/dto'
 
 export default {
   components: {
@@ -39,7 +42,7 @@ export default {
     PickNoteModal
   },
   props: {
-    bucket: Object,
+    bucket: BucketModel,
     showAddButton: {
       type: Boolean,
       default: true
@@ -53,13 +56,11 @@ export default {
   },
   computed: {
     pendingNotes() {
-      return this.bucket.notes.filter(note => note.status === 'pending')
+      return this.bucket.notesMap.pending
     },
+    // TODO: use or remove
     inProgressNotes() {
-      return this.bucket.notes.filter(note => note.status === 'in-progress')
-    },
-    completedNotes() {
-      return this.bucket.notes.filter(note => note.status === 'completed')
+      return this.bucket.notesMap.inProgress
     }
   },
   methods: {

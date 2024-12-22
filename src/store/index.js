@@ -2,109 +2,59 @@ import Vue from 'vue'
 import Vuex from 'vuex'
 import { saveData, loadData } from '../utils/fileService'
 import { TIME_BUCKETS } from '../utils/constants'
+import { ActivityRecord } from '@/utils/dto'
 
 Vue.use(Vuex)
 
 export default new Vuex.Store({
   state: {
     notes: [],
-    labeledBuckets: [], // Only store labeled buckets, time buckets are computed
+    labeledBuckets: [],
     activityRecords: [],
-    inProgressNoteIds: [] // Changed from inProgressNotes to just IDs
+    buckets: []
   },
   getters: {
-    visibleTimeBuckets: state => {
-      const unlabeledNotes = state.notes.filter(note => !note.label && note.status !== 'completed')
-      return TIME_BUCKETS.filter(bucket => {
-        const bucketNotes = unlabeledNotes.filter(note => note.timeEstimation >= bucket.min && note.timeEstimation <= bucket.max)
-        return bucketNotes.length > 0
-      }).map(bucket => ({
-        ...bucket,
-        notes: unlabeledNotes.filter(note => note.timeEstimation >= bucket.min && note.timeEstimation <= bucket.max)
-      }))
-    },
-    visibleLabeledBuckets: state => {
-      return state.labeledBuckets.map(bucket => ({
-        ...bucket,
-        notes: state.notes.filter(note => note.label === bucket.title)
-      }))
-    },
-    inProgressNotes: state => {
-      return state.inProgressNoteIds
-        .map(id => {
-          const note = state.notes.find(n => n.id === id)
-          const activity = state.activityRecords.find(a => a.noteId === id && !a.completed_at)
-          if (note && activity) {
-            return {
-              ...note,
-              startedAt: activity.started_at,
-              completedAt: activity.completed_at
-            }
+    inProgressRecords: state => {
+      const incompleteActivities = state.activityRecords.filter(record => !record.completed_at)
+      return incompleteActivities
+        .map(activity => {
+          return {
+            activity,
+            note: state.notes.find(n => n.id === activity.noteId)
           }
-          return null
         })
-        .filter(Boolean)
+        .filter(record => record.note)
     }
   },
   mutations: {
     setNotes(state, notes) {
       state.notes = notes
     },
-    setBuckets(state, buckets) {
+    setLabeledBuckets(state, buckets) {
       state.labeledBuckets = buckets
+    },
+    setBuckets(state, buckets) {
+      state.buckets = buckets
     },
     setActivityRecords(state, records) {
       state.activityRecords = records
     },
     addNote(state, note) {
-      state.notes.push({
-        ...note,
-        status: 'pending'
-      })
+      state.notes.push(note)
     },
     updateNote(state, updatedNote) {
       const index = state.notes.findIndex(note => note.id === updatedNote.id)
       if (index !== -1) {
-        // Ensure all required properties exist
-        Vue.set(state.notes, index, {
-          ...state.notes[index],
-          ...updatedNote,
-          startedAt: updatedNote.startedAt || null,
-          completedAt: updatedNote.completedAt || null
-        })
+        Vue.set(state.notes, index, updatedNote)
       }
     },
     deleteNote(state, noteId) {
       state.notes = state.notes.filter(note => note.id !== noteId)
     },
-    addActivityRecord(state, record) {
-      state.activityRecords.push({
-        id: Date.now(),
-        noteId: record.noteId,
-        started_at: record.startedAt,
-        completed_at: null,
-        time_to_complete: null
-      })
+    addActivityRecordFromNote(state, record) {
+      state.activityRecords.push(record)
     },
-    addToInProgress(state, noteId) {
-      if (!state.inProgressNoteIds.includes(noteId)) {
-        state.inProgressNoteIds.push(noteId)
-      }
-    },
-    removeFromInProgress(state, noteId) {
-      state.inProgressNoteIds = state.inProgressNoteIds.filter(id => id !== noteId)
-    },
-    finishNote(state, { noteId, keepInBucket }) {
-      const note = state.notes.find(n => n.id === noteId)
-      if (note) {
-        if (!keepInBucket) {
-          note.status = 'completed'
-        } else {
-          note.status = 'pending'
-          note.lastCompleted = new Date().toISOString()
-        }
-      }
-    },
+    // TODO:
     addLabeledBucket(state, bucket) {
       state.labeledBuckets.push({
         id: Date.now(),
@@ -120,6 +70,7 @@ export default new Vuex.Store({
     }
   },
   actions: {
+    // TODO:
     async saveData({ state }) {
       const data = {
         notes: state.notes,
@@ -133,12 +84,10 @@ export default new Vuex.Store({
       try {
         const data = await loadData()
         if (data) {
-          commit('setNotes', data.notes || [])
-          commit('setBuckets', data.labeledBuckets || [])
-          commit('setActivityRecords', data.activityRecords || [])
-          if (data.inProgressNoteIds) {
-            data.inProgressNoteIds.forEach(noteId => commit('addToInProgress', noteId))
-          }
+          commit('setNotes', data.notes)
+          commit('setActivityRecords', data.activityRecords)
+          commit('setLabeledBuckets', data.labeledBuckets)
+          commit('setBuckets', data.buckets)
         }
       } catch (error) {
         console.error('Failed to load data:', error)
@@ -149,7 +98,6 @@ export default new Vuex.Store({
       await dispatch('saveData')
     },
     async startNote({ commit, state, dispatch }, noteData) {
-      const startedAt = new Date().toISOString()
       const note = state.notes.find(n => n.id === noteData.id)
 
       if (note) {
@@ -160,13 +108,10 @@ export default new Vuex.Store({
         })
 
         // Add to in-progress list
-        commit('addToInProgress', note.id)
+        // commit('addToInProgress', note.id)
 
         // Create simplified activity record
-        commit('addActivityRecord', {
-          noteId: note.id,
-          startedAt
-        })
+        commit('addActivityRecordFromNote', ActivityRecord.createFromNote(note))
 
         await dispatch('saveData')
       }

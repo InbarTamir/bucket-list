@@ -22,7 +22,7 @@
               <td>{{ note.description }}</td>
               <td>{{ note.timeEstimation }}m</td>
               <td>
-                <button @click="startNote(note)" :disabled="note.status === 'in-progress' || isNoteInProgress(note.id)">Start</button>
+                <button @click="startNote(note)" :disabled="note.status === 'in-progress'">Start</button>
               </td>
             </tr>
           </tbody>
@@ -38,8 +38,6 @@
 </template>
 
 <script>
-import { mapState } from 'vuex'
-
 export default {
   props: {
     show: Boolean,
@@ -69,23 +67,14 @@ export default {
     })
   },
   computed: {
-    ...mapState(['inProgressNoteIds']),
     filteredNotes() {
       return this.notes.filter(note => note.description.toLowerCase().includes(this.searchQuery.toLowerCase()))
     }
   },
   methods: {
     startNote(note) {
-      this.$emit('start', {
-        id: note.id,
-        description: note.description,
-        timeEstimation: note.timeEstimation,
-        label: this.bucket.title
-      })
+      this.$emit('start', note)
       this.$emit('close')
-    },
-    isNoteInProgress(noteId) {
-      return this.inProgressNoteIds.includes(noteId)
     }
   }
 }

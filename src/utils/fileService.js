@@ -1,6 +1,7 @@
 import { openDB } from 'idb'
 import { toast } from 'vue-toastification'
 import 'vue-toastification/dist/index.css'
+import { AppContent } from '@/utils/dto'
 
 const fileName = 'notes-dashboard.json'
 let fileHandle
@@ -64,6 +65,7 @@ async function getStoredFileHandle() {
   }
 }
 
+// TODO:
 export async function saveData(data) {
   try {
     const json = JSON.stringify(data)
@@ -84,7 +86,7 @@ export async function loadData() {
     const handle = await getFileHandle()
     const file = await handle.getFile()
     const text = await file.text()
-    return JSON.parse(text)
+    return new AppContent(JSON.parse(text))
   } catch (error) {
     toast.error(`Error loading data: ${error.message}`)
     throw error
