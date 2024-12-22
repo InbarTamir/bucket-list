@@ -86,7 +86,7 @@ export async function loadData() {
     const handle = await getFileHandle()
     const file = await handle.getFile()
     const text = await file.text()
-    return new AppContent(JSON.parse(text))
+    return JSON.parse(text)
   } catch (error) {
     toast.error(`Error loading data: ${error.message}`)
     throw error

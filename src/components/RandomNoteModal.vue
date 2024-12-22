@@ -38,12 +38,16 @@ export default {
     }
   },
   watch: {
-    show(newVal) {
-      if (newVal) {
-        this.pickRandomNote()
-        this.$refs.dialog.showModal()
-      } else {
-        this.$refs.dialog.close()
+    show: {
+      immediate: true,
+      handler(newVal) {
+        if (newVal) {
+          this.pickRandomNote()
+          this.$refs.dialog?.showModal()
+        } else {
+          this.$refs.dialog?.close()
+          this.currentNote = null
+        }
       }
     }
   },
@@ -54,10 +58,9 @@ export default {
   },
   methods: {
     pickRandomNote() {
-      const availableNotes = this.notes.filter(note => note.status === 'pending')
-      if (availableNotes.length > 0) {
-        const randomIndex = Math.floor(Math.random() * availableNotes.length)
-        this.currentNote = availableNotes[randomIndex]
+      if (this.notes.length > 0) {
+        const randomIndex = Math.floor(Math.random() * this.notes.length)
+        this.currentNote = this.notes[randomIndex]
       } else {
         this.currentNote = null
       }

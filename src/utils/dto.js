@@ -61,6 +61,10 @@ export class ActivityRecord extends SchemaBasedDTO {
       timeToComplete: null
     })
   }
+
+  static update(record, data) {
+    return new ActivityRecord({ ...record, ...data })
+  }
 }
 
 export class LabeledBucket extends SchemaBasedDTO {
@@ -129,68 +133,39 @@ export class BucketModel {
     this.max = bucket.max || 0
     this.notes = bucket.notes || []
     this.activityRecords = bucket.activityRecords || []
-    this.activityRecordsMap = this.mapRecordsByStatus(bucket.activityRecords)
-    this.notesMap = this.mapNotesByStatus()
-    this.stats = this.calculateStats()
   }
 
-  mapRecordsByStatus(records) {
-    // TODO: might not need this.. i'm too tired to think
-    // the calculations cannot be done both here and in the store. one source of truth and all that.
+  get activityRecordsMap() {
     return {
-      completed: records.filter(record => record.completedAt),
-      inProgress: records.filter(record => !record.completedAt)
+      completed: this.activityRecords.filter(record => record.completedAt),
+      inProgress: this.activityRecords.filter(record => !record.completedAt)
     }
   }
 
-  mapNotesByStatus() {
+  get notesMap() {
     const inProgressRecords = this.activityRecords.filter(record => !record.completedAt)
-
-    //   TODO: I will probably regret doing all this. Not sure it will be reactive when I update notes. Probably better to use computed.
     const notesMap = {
       inProgress: [],
       pending: []
     }
+
     this.notes.forEach(note => {
       const activityRecord = inProgressRecords.find(record => record.noteId === note.id)
-      //   const activityRecord = this.activityRecordsMap.inProgress.find(record => record.noteId === note.id)
-
       if (activityRecord) {
-        // notesMap.inProgress.push({ note, activityRecord })
         notesMap.inProgress.push(note)
       } else {
         notesMap.pending.push(note)
       }
     })
+
     return notesMap
   }
 
-  calculateStats() {
+  get stats() {
     return {
       pending: this.notesMap.pending.length,
       inProgress: this.notesMap.inProgress.length,
-      completed: this.activityRecords.filter(record => record.completedAt).length
+      completed: this.activityRecordsMap.completed.length
     }
-    // return {
-    //   completed: this.activityRecordsMap.completed.length,
-    //   inProgress: this.activityRecordsMap.inProgress.length,
-    //   pending: this.notes.length - this.activityRecordsMap.inProgress.length
-    // }
   }
 }
-
-// export class TimeBucketModel extends BucketModel {
-//   constructor(bucket = {}) {
-//     super(bucket)
-//     this.min = bucket.min || 0
-//     this.max = bucket.max || Infinity
-//   }
-// }
-
-// export class NewNoteModel {
-//   constructor(note = {}) {
-//     this.description = note.description || ''
-//     this.timeEstimation = note.timeEstimation || 0
-//     this.label = note.label || ''
-//   }
-// }

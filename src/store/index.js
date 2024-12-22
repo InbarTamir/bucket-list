@@ -1,8 +1,7 @@
 import Vue from 'vue'
 import Vuex from 'vuex'
 import { saveData, loadData } from '../utils/fileService'
-import { TIME_BUCKETS } from '../utils/constants'
-import { ActivityRecord } from '@/utils/dto'
+import { Note, ActivityRecord, LabeledBucket, AppContent } from '@/utils/dto'
 
 Vue.use(Vuex)
 
@@ -67,16 +66,20 @@ export default new Vuex.Store({
       if (note) {
         note.status = status
       }
+    },
+    updateActivityRecord(state, updatedRecord) {
+      const index = state.activityRecords.findIndex(record => record.id === updatedRecord.id)
+      if (index !== -1) {
+        Vue.set(state.activityRecords, index, updatedRecord)
+      }
     }
   },
   actions: {
-    // TODO:
     async saveData({ state }) {
       const data = {
-        notes: state.notes,
-        labeledBuckets: state.labeledBuckets,
-        activityRecords: state.activityRecords,
-        inProgressNoteIds: state.inProgressNoteIds
+        notes: state.notes.map(note => Note.clientToServer(note)),
+        labeled_buckets: state.labeledBuckets.map(bucket => LabeledBucket.clientToServer(bucket)),
+        activity_records: state.activityRecords.map(record => ActivityRecord.clientToServer(record))
       }
       await saveData(data)
     },
@@ -84,10 +87,11 @@ export default new Vuex.Store({
       try {
         const data = await loadData()
         if (data) {
-          commit('setNotes', data.notes)
-          commit('setActivityRecords', data.activityRecords)
-          commit('setLabeledBuckets', data.labeledBuckets)
-          commit('setBuckets', data.buckets)
+          const appContent = new AppContent(data)
+          commit('setNotes', appContent.notes)
+          commit('setActivityRecords', appContent.activityRecords)
+          commit('setLabeledBuckets', appContent.labeledBuckets)
+          commit('setBuckets', appContent.buckets)
         }
       } catch (error) {
         console.error('Failed to load data:', error)
@@ -97,57 +101,26 @@ export default new Vuex.Store({
       commit('addNote', note)
       await dispatch('saveData')
     },
-    async startNote({ commit, state, dispatch }, noteData) {
-      const note = state.notes.find(n => n.id === noteData.id)
-
-      if (note) {
-        // Update note status only
-        commit('updateNoteStatus', {
-          noteId: note.id,
-          status: 'in-progress'
-        })
-
-        // Add to in-progress list
-        // commit('addToInProgress', note.id)
-
-        // Create simplified activity record
-        commit('addActivityRecordFromNote', ActivityRecord.createFromNote(note))
-
-        await dispatch('saveData')
-      }
+    async startNote({ commit, dispatch }, note) {
+      // Create activity record
+      const activityRecord = ActivityRecord.createFromNote(note)
+      commit('addActivityRecordFromNote', activityRecord)
+      await dispatch('saveData')
     },
 
     async finishNote({ commit, state, dispatch }, noteId) {
-      const completedAt = new Date().toISOString()
-      const note = state.notes.find(n => n.id === noteId)
+      const activityRecord = state.activityRecords.find(record => record.noteId === noteId && !record.completedAt)
 
-      if (note) {
-        const keepInBucket = note.label === 'recurring'
+      if (activityRecord) {
+        const completedAt = new Date().toISOString()
+        const timeToComplete = Math.round((new Date(completedAt) - new Date(activityRecord.startedAt)) / 1000 / 60)
 
-        // Update note status
-        commit('updateNoteStatus', {
-          noteId,
-          status: keepInBucket ? 'pending' : 'completed'
+        const updatedRecord = ActivityRecord.update(activityRecord, {
+          completedAt,
+          timeToComplete
         })
 
-        // Remove from in-progress
-        commit('removeFromInProgress', noteId)
-
-        // Update activity record
-        const activity = state.activityRecords.find(a => a.noteId === noteId && !a.completed_at)
-
-        if (activity) {
-          const timeToComplete = Math.round((new Date(completedAt) - new Date(activity.started_at)) / 1000 / 60)
-
-          commit('UPDATE_ACTIVITY', {
-            activityId: activity.id,
-            updates: {
-              completed_at: completedAt,
-              time_to_complete: timeToComplete
-            }
-          })
-        }
-
+        commit('updateActivityRecord', updatedRecord)
         await dispatch('saveData')
       }
     },
