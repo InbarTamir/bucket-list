@@ -1,6 +1,15 @@
 <template>
-  <div class="bucket">
-    <h2>{{ bucket.title }}</h2>
+  <div
+    class="bucket"
+    :class="{
+      'in-progress-shadow': bucket.notesMap.inProgress.length > 0,
+      'bucket-completed': isDone
+    }"
+  >
+    <h2>
+      {{ bucket.title }}
+      <span v-if="timeEstimation" class="time-indicator"> {{ timeEstimation }} <font-awesome-icon icon="clock" /> </span>
+    </h2>
 
     <div class="stats">
       <div class="count">
@@ -9,7 +18,7 @@
       </div>
       <div class="count">
         <span class="number">{{ bucket.stats.inProgress }}</span>
-        <span class="label">In Progress</span>
+        <span class="label">In-Progress</span>
       </div>
       <div class="count completed">
         <span class="number">{{ bucket.stats.completed }}</span>
@@ -35,11 +44,13 @@
 import RandomNoteModal from './RandomNoteModal.vue'
 import PickNoteModal from './PickNoteModal.vue'
 import { BucketModel } from '@/utils/dto'
+import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
 
 export default {
   components: {
     RandomNoteModal,
-    PickNoteModal
+    PickNoteModal,
+    FontAwesomeIcon
   },
   props: {
     bucket: BucketModel,
@@ -61,6 +72,14 @@ export default {
     // TODO: use or remove
     inProgressNotes() {
       return this.bucket.notesMap.inProgress
+    },
+    isDone() {
+      return this.bucket.stats.pending === 0 && this.bucket.stats.inProgress === 0
+    },
+    timeEstimation() {
+      if (!this.bucket.max) return null
+      if (this.bucket.max === Infinity) return `∞`
+      return `${this.bucket.max}m`
     }
   },
   methods: {
@@ -103,10 +122,39 @@ export default {
     box-shadow: 0 4px 8px var(--shadow);
   }
 
+  &.in-progress-shadow {
+    box-shadow: 0 0 7px 7px rgba(255, 0, 0, 0.2);
+  }
+
+  &.bucket-completed {
+    opacity: 0.4;
+
+    &:hover {
+      opacity: 1; // Restore full opacity on hover
+    }
+  }
+
   h2 {
     color: var(--primary);
     margin-bottom: 15px;
     font-size: 1.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 4px;
+
+    .time-indicator {
+      font-size: 0.5em;
+      color: var(--danger, #dc3545);
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-weight: normal;
+
+      i {
+        font-size: 0.9em;
+        margin-left: 2px;
+      }
+    }
   }
 
   .bucket-actions {
@@ -140,6 +188,7 @@ export default {
         font-size: 0.8rem;
         color: var(--dark);
         opacity: 0.8;
+        white-space: nowrap;
       }
 
       &.completed .number {

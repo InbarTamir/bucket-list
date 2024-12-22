@@ -125,6 +125,8 @@ export class BucketModel {
     this.id = bucket.id || null
     this.title = bucket.title || ''
     this.labeled = bucket.labeled || false
+    this.min = bucket.min || 0
+    this.max = bucket.max || 0
     this.notes = bucket.notes || []
     this.activityRecords = bucket.activityRecords || []
     this.activityRecordsMap = this.mapRecordsByStatus(bucket.activityRecords)
