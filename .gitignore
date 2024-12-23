@@ -23,4 +23,4 @@ pnpm-debug.log*
 *.sw?
 
 # Specific data file
-src/notes-dashboard.json
+*/content.json
