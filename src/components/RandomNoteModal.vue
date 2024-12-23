@@ -12,7 +12,7 @@
         </div>
         <div class="actions">
           <button @click="startNote">Start</button>
-          <button class="secondary" @click="nextNote">Next Random</button>
+          <button v-if="notes.length > 1" class="secondary" @click="nextNote">Next Random</button>
           <button class="danger" @click="$emit('close')">Close</button>
         </div>
       </div>

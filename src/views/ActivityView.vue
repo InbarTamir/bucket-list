@@ -1,5 +1,8 @@
 <template>
   <div class="activity-view">
+    <div class="toolbar">
+      <input type="text" v-model="searchQuery" placeholder="Search by description..." class="search-input" />
+    </div>
     <table>
       <thead>
         <tr>
@@ -10,7 +13,7 @@
         </tr>
       </thead>
       <tbody>
-        <tr v-for="record in sortedRecords" :key="record.id">
+        <tr v-for="record in filteredRecords" :key="record.id">
           <td class="description-cell">{{ getNoteDescription(record) }}</td>
           <td class="label-cell">
             <span v-if="getNoteLabel(record)" class="label">{{ getNoteLabel(record) }}</span
@@ -35,6 +38,7 @@ import { mapState } from 'vuex'
 export default {
   data() {
     return {
+      searchQuery: '',
       columns: [
         { key: 'description', label: 'Description' },
         { key: 'label', label: 'Label' },
@@ -76,6 +80,12 @@ export default {
         if (!bVal) return -1 * modifier
         return aVal > bVal ? 1 * modifier : -1 * modifier
       })
+    },
+    filteredRecords() {
+      if (!this.searchQuery) return this.sortedRecords
+
+      const query = this.searchQuery.toLowerCase()
+      return this.sortedRecords.filter(record => record.description.toLowerCase().includes(query))
     }
   },
   methods: {
@@ -135,6 +145,28 @@ export default {
   box-shadow: 0 2px 4px var(--shadow);
   max-width: 100%;
   overflow-x: auto; // Allow horizontal scroll on small screens
+
+  .toolbar {
+    margin-bottom: 1rem;
+
+    .search-input {
+      width: 300px;
+      padding: 8px 12px;
+      border: 2px solid var(--light);
+      border-radius: 6px;
+      font-size: 0.9rem;
+      transition: all 0.2s ease;
+
+      &:focus {
+        border-color: var(--primary);
+        box-shadow: 0 0 0 3px rgba(56, 172, 247, 0.1);
+      }
+
+      &::placeholder {
+        color: var(--secondary);
+      }
+    }
+  }
 
   table {
     width: 100%;
