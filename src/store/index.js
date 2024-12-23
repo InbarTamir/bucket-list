@@ -136,7 +136,9 @@ export default new Vuex.Store({
 
     async finishNote({ commit, dispatch }, record) {
       const completedAt = new Date().toISOString()
-      const timeToComplete = Math.round((new Date(completedAt) - new Date(record.startedAt)) / 1000 / 60)
+      const minutesDiff = (new Date(completedAt) - new Date(record.startedAt)) / 1000 / 60
+      // Ensure at least 0.1 minutes and round to 1 decimal place
+      const timeToComplete = Math.max(0.1, Math.round(minutesDiff * 10) / 10)
 
       const updatedRecord = ActivityRecord.update(record, {
         completedAt,

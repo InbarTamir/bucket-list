@@ -19,7 +19,7 @@
           <td class="date-cell">{{ formatDate(record.startedAt) }}</td>
           <td class="date-cell">{{ record.completedAt ? formatDate(record.completedAt) : '-' }}</td>
           <td class="number-cell">{{ getNoteTimeEstimation(record) }}m</td>
-          <td :class="['number-cell', { overdue: isOverdue(record) }]">
+          <td :class="['number-cell', { overdue: isOverdue(record) }]" :data-tooltip="getOverdueTooltip(record)">
             {{ record.timeToComplete ? `${record.timeToComplete}m` : '-' }}
           </td>
         </tr>
@@ -116,6 +116,12 @@ export default {
     getNoteTimeEstimation(record) {
       const note = this.getNoteForRecord(record)
       return note?.timeEstimation || 0
+    },
+    getOverdueTooltip(record) {
+      if (!this.isOverdue(record)) return null
+      const note = this.getNoteForRecord(record)
+      const diff = record.timeToComplete - note.timeEstimation
+      return `${diff.toFixed(1)}m over estimation`
     }
   }
 }
@@ -136,6 +142,7 @@ export default {
     border-collapse: separate;
     border-spacing: 0;
     font-size: 0.9rem;
+    cursor: default;
 
     th,
     td {
@@ -167,7 +174,6 @@ export default {
 
       &.number-cell {
         min-width: 80px;
-        // text-align: right;
         font-variant-numeric: tabular-nums;
       }
     }
@@ -219,6 +225,33 @@ export default {
     td.overdue {
       color: var(--danger);
       font-weight: 500;
+      position: relative; // For tooltip positioning
+      cursor: help; // Show help cursor on overdue times
+
+      &[data-tooltip] {
+        &:before {
+          content: attr(data-tooltip);
+          position: absolute;
+          bottom: 100%;
+          left: 50%;
+          transform: translateX(-50%);
+          margin-bottom: 8px;
+          padding: 4px 8px;
+          border-radius: 4px;
+          background: var(--danger);
+          color: white;
+          font-size: 12px;
+          white-space: nowrap;
+          opacity: 0;
+          visibility: hidden;
+          transition: all 0.2s ease;
+        }
+
+        &:hover:before {
+          opacity: 1;
+          visibility: visible;
+        }
+      }
     }
   }
 }
