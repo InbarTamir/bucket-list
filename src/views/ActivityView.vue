@@ -226,28 +226,11 @@ export default {
       position: relative; // For tooltip positioning
       cursor: help; // Show help cursor on overdue times
 
+      // Only override specific tooltip properties for overdue cells
       &[data-tooltip] {
-        &:before {
-          content: attr(data-tooltip);
-          position: absolute;
-          bottom: 100%;
-          left: 50%;
-          transform: translateX(-50%);
-          margin-bottom: 8px;
-          padding: 4px 8px;
-          border-radius: 4px;
+        &:after {
           background: var(--danger);
-          color: white;
-          font-size: 12px;
-          white-space: nowrap;
-          opacity: 0;
-          visibility: hidden;
-          transition: all 0.2s ease;
-        }
-
-        &:hover:before {
-          opacity: 1;
-          visibility: visible;
+          margin-bottom: 8px;
         }
       }
     }
