@@ -27,11 +27,11 @@
     <div v-if="inProgressRecords.length" class="in-progress-section">
       <h2>In Progress</h2>
       <div class="notes-list">
-        <div v-for="{ activity, note } in inProgressRecords" :key="note.id" class="note-item">
+        <div v-for="activity in inProgressRecords" :key="activity.id" class="note-item">
           <div class="note-info">
-            <span class="description">{{ note.description }}</span>
-            <span class="label" v-if="note.label">{{ note.label }}</span>
-            <span class="time">{{ note.timeEstimation }}m</span>
+            <span class="description">{{ activity.description }}</span>
+            <span class="label" v-if="activity.label">{{ activity.label }}</span>
+            <span class="time">{{ activity.timeEstimation }}m</span>
             <span class="started-at">Started: {{ Helpers.formatDateTime(activity.startedAt) }}</span>
           </div>
           <div class="actions">
@@ -96,11 +96,7 @@ export default {
       this.selectedBucket = null
     },
     createNote(note) {
-      this.$store.dispatch('addNote', {
-        id: Date.now(),
-        status: 'pending',
-        ...note
-      })
+      this.$store.dispatch('addNote', note)
       this.closeCreateNoteModal()
     },
     startNote(noteData) {
@@ -108,9 +104,6 @@ export default {
     },
     finishNote(activity) {
       this.$store.dispatch('finishNote', activity)
-    },
-    resetNote(note) {
-      this.$store.dispatch('resetNote', note.id)
     },
     restartNote(activity) {
       this.$store.dispatch('restartNote', activity)

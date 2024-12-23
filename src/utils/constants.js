@@ -8,9 +8,9 @@ export const TIME_BUCKETS = [
 
 export const DATE_FORMAT_OPTIONS = {
   day: '2-digit',
-  month: '2-digit',
-  year: '2-digit',
+  month: 'short',
+  year: 'numeric',
   hour: '2-digit',
   minute: '2-digit',
-  hour12: false
+  hour12: true
 }

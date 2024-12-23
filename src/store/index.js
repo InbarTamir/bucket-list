@@ -14,15 +14,7 @@ export default new Vuex.Store({
   },
   getters: {
     inProgressRecords: state => {
-      const incompleteActivities = state.activityRecords.filter(record => !record.completedAt)
-      return incompleteActivities
-        .map(activity => {
-          return {
-            activity,
-            note: state.notes.find(n => n.id === activity.noteId)
-          }
-        })
-        .filter(record => record.note)
+      return state.activityRecords.filter(record => !record.completedAt)
     },
     buckets: state => {
       const timeBuckets = TIME_BUCKETS.map(bucket => {
@@ -30,7 +22,7 @@ export default new Vuex.Store({
         return new BucketModel({
           ...bucket,
           notes,
-          activityRecords: state.activityRecords.filter(record => notes.some(note => note.id === record.noteId))
+          activityRecords: state.activityRecords.filter(record => record.timeEstimation >= bucket.min && record.timeEstimation <= bucket.max)
         })
       })
       const labeledBuckets = state.labeledBuckets.map(bucket => {
@@ -39,7 +31,7 @@ export default new Vuex.Store({
           ...bucket,
           labeled: true,
           notes,
-          activityRecords: state.activityRecords.filter(record => notes.some(note => note.id === record.noteId))
+          activityRecords: state.activityRecords.filter(record => record.label === bucket.title)
         })
       })
       return [...timeBuckets, ...labeledBuckets]
@@ -139,20 +131,17 @@ export default new Vuex.Store({
       const minutesDiff = (new Date(completedAt) - new Date(record.startedAt)) / 1000 / 60
       const timeToComplete = Math.max(0.1, Math.round(minutesDiff * 10) / 10)
 
-      const updatedRecord = ActivityRecord.update(record, {
-        completedAt,
-        timeToComplete
-      })
+      const updatedRecord = new ActivityRecord({ ...record, completedAt, timeToComplete })
 
       // Find the note to check if it's recurring
       const note = state.notes.find(n => n.id === record.noteId)
-
-      commit('updateActivityRecord', updatedRecord)
 
       // If note exists and is not recurring, remove it
       if (note && !note.recurring) {
         commit('deleteNote', note.id)
       }
+
+      commit('updateActivityRecord', updatedRecord)
 
       await dispatch('saveData')
     },
@@ -165,9 +154,7 @@ export default new Vuex.Store({
       await dispatch('saveData')
     },
     async restartNote({ commit, dispatch }, record) {
-      const updatedRecord = ActivityRecord.update(record, {
-        startedAt: new Date().toISOString()
-      })
+      const updatedRecord = new ActivityRecord({ ...record, startedAt: new Date().toISOString() })
       commit('updateActivityRecord', updatedRecord)
       await dispatch('saveData')
     },

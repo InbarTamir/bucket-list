@@ -34,7 +34,6 @@ export class Note extends SchemaBasedDTO {
   }
 
   constructor(note = {}, options = {}) {
-    // super(this.#schema, note, origin)
     super(note, options)
   }
 }
@@ -43,6 +42,9 @@ export class ActivityRecord extends SchemaBasedDTO {
   static _schema = {
     id: { server: 'id', client: 'id', defaultValue: null },
     noteId: { server: 'note_id', client: 'noteId', defaultValue: null },
+    description: { server: 'description', client: 'description', defaultValue: '' },
+    timeEstimation: { server: 'time_estimation', client: 'timeEstimation', defaultValue: 0 },
+    label: { server: 'label', client: 'label', defaultValue: '' },
     startedAt: { server: 'started_at', client: 'startedAt', defaultValue: null },
     completedAt: { server: 'completed_at', client: 'completedAt', defaultValue: null },
     timeToComplete: { server: 'time_to_complete', client: 'timeToComplete', defaultValue: null }
@@ -56,14 +58,13 @@ export class ActivityRecord extends SchemaBasedDTO {
     return new ActivityRecord({
       id: Date.now(),
       noteId: note.id,
+      description: note.description,
+      timeEstimation: note.timeEstimation,
+      label: note.label,
       startedAt: new Date().toISOString(),
       completedAt: null,
       timeToComplete: null
     })
-  }
-
-  static update(record, data) {
-    return new ActivityRecord({ ...record, ...data })
   }
 }
 
@@ -76,47 +77,6 @@ export class LabeledBucket extends SchemaBasedDTO {
 
   constructor(bucket = {}, options = {}) {
     super(bucket, options)
-  }
-}
-
-export class AppContent {
-  constructor(data = {}) {
-    this.notes = this.normalizeNotes(data.notes)
-    this.activityRecords = this.normalizeActivityRecords(data.activity_records)
-    this.labeledBuckets = this.normalizeLabeledBuckets(data.labeled_buckets)
-    this.buckets = this.generateBuckets()
-  }
-
-  normalizeNotes(notes) {
-    return notes.map(note => Note.serverToClient(note))
-  }
-
-  normalizeActivityRecords(records) {
-    return records.map(record => ActivityRecord.serverToClient(record))
-  }
-
-  normalizeLabeledBuckets(buckets) {
-    return buckets.map(bucket => LabeledBucket.serverToClient(bucket))
-  }
-
-  generateBuckets() {
-    const timeBuckets = TIME_BUCKETS.map(bucket => {
-      const notes = this.notes.filter(note => !note.label && note.timeEstimation >= bucket.min && note.timeEstimation <= bucket.max)
-      return new BucketModel({
-        ...bucket,
-        notes,
-        activityRecords: this.activityRecords.filter(record => notes.some(note => note.id === record.noteId))
-      })
-    })
-    const labeledBuckets = this.labeledBuckets.map(bucket => {
-      return new BucketModel({
-        ...bucket,
-        labeled: true,
-        notes: this.notes.filter(note => note.label === bucket.title),
-        activityRecords: this.activityRecords.filter(record => record.label === bucket.title)
-      })
-    })
-    return [...timeBuckets, ...labeledBuckets]
   }
 }
 

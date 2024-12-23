@@ -1,7 +1,6 @@
 import { openDB } from 'idb'
 import { toast } from 'vue-toastification'
 import 'vue-toastification/dist/index.css'
-import { AppContent } from '@/utils/dto'
 
 const fileName = 'notes-dashboard.json'
 let fileHandle

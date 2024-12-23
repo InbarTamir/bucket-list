@@ -14,14 +14,14 @@
       </thead>
       <tbody>
         <tr v-for="record in filteredRecords" :key="record.id">
-          <td class="description-cell">{{ getNoteDescription(record) }}</td>
+          <td class="description-cell">{{ record.description }}</td>
           <td class="label-cell">
-            <span v-if="getNoteLabel(record)" class="label">{{ getNoteLabel(record) }}</span
-            ><span v-else>-</span>
+            <span v-if="record.label" class="label">{{ record.label }}</span>
+            <span v-else>-</span>
           </td>
           <td class="date-cell">{{ formatDate(record.startedAt) }}</td>
           <td class="date-cell">{{ record.completedAt ? formatDate(record.completedAt) : '-' }}</td>
-          <td class="number-cell">{{ getNoteTimeEstimation(record) }}m</td>
+          <td class="number-cell">{{ record.timeEstimation }}m</td>
           <td :class="['number-cell', { overdue: isOverdue(record) }]" :data-tooltip="getOverdueTooltip(record)">
             {{ record.timeToComplete ? `${record.timeToComplete}m` : '-' }}
           </td>
@@ -33,6 +33,7 @@
 
 <script>
 import { DATE_FORMAT_OPTIONS } from '../utils/constants'
+import Helpers from '@/utils/helpers'
 import { mapState } from 'vuex'
 
 export default {
@@ -53,19 +54,8 @@ export default {
   },
   computed: {
     ...mapState(['notes', 'activityRecords']),
-    enrichedRecords() {
-      return this.activityRecords.map(record => {
-        const note = this.notes.find(n => n.id === record.noteId)
-        return {
-          ...record,
-          description: note?.description || 'Unknown',
-          label: note?.label || '',
-          timeEstimation: note?.timeEstimation || 0
-        }
-      })
-    },
     sortedRecords() {
-      return [...this.enrichedRecords].sort((a, b) => {
+      return this.activityRecords.toSorted((a, b) => {
         let aVal = a[this.sortKey]
         let bVal = b[this.sortKey]
 
@@ -90,14 +80,7 @@ export default {
   },
   methods: {
     formatDate(date) {
-      if (!date) return '-'
-      return new Date(date).toLocaleDateString(undefined, {
-        year: 'numeric',
-        month: 'short',
-        day: 'numeric',
-        hour: '2-digit',
-        minute: '2-digit'
-      })
+      return Helpers.formatDateTime(date)
     },
     sort(key) {
       if (this.sortKey === key) {
@@ -109,28 +92,11 @@ export default {
     },
     isOverdue(record) {
       if (!record.timeToComplete) return false
-      const note = this.getNoteForRecord(record)
-      return note && record.timeToComplete > note.timeEstimation + 5
-    },
-    getNoteForRecord(record) {
-      return this.notes.find(note => note.id === record.noteId)
-    },
-    getNoteDescription(record) {
-      const note = this.getNoteForRecord(record)
-      return note?.description || 'Unknown'
-    },
-    getNoteLabel(record) {
-      const note = this.getNoteForRecord(record)
-      return note?.label
-    },
-    getNoteTimeEstimation(record) {
-      const note = this.getNoteForRecord(record)
-      return note?.timeEstimation || 0
+      return record.timeToComplete > record.timeEstimation + 5
     },
     getOverdueTooltip(record) {
       if (!this.isOverdue(record)) return null
-      const note = this.getNoteForRecord(record)
-      const diff = record.timeToComplete - note.timeEstimation
+      const diff = record.timeToComplete - record.timeEstimation
       return `${diff.toFixed(1)}m over estimation`
     }
   }
