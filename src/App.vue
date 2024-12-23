@@ -84,11 +84,16 @@ button {
   color: white;
 
   svg {
-    margin-right: 6px;
+    margin-right: 6px; // Default margin for buttons with text
   }
 
   &[data-tooltip] {
     position: relative;
+    padding: 8px; // Equal padding for icon-only buttons
+
+    svg {
+      margin: 0; // Remove margin for icon-only buttons
+    }
 
     &:before {
       content: attr(data-tooltip);
