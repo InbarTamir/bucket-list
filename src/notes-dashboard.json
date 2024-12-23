@@ -1,1 +1,20 @@
-{"notes":[{"id":1734737659334,"description":"Clean coffee table","time_estimation":5,"label":"","recurring":false},{"id":1734737677836,"description":"just testing","time_estimation":17,"label":"buckettt","recurring":true},{"id":1734737715072,"description":"is it working?","time_estimation":35,"label":"important","recurring":false},{"id":1734737997569,"description":"testing 2","time_estimation":2,"label":"buckettt","recurring":true},{"id":1734740822704,"description":"houdy","time_estimation":25,"label":"","recurring":false},{"id":1734740833700,"description":"jhjskj","time_estimation":60,"label":"","recurring":false},{"id":1734740841718,"description":"sdd","time_estimation":240,"label":"","recurring":false}],"labeled_buckets":[{"id":1734737643533,"title":"buckettt","created_at":"2024-12-20T23:34:03.533Z"},{"id":1734737702088,"title":"important","created_at":"2024-12-20T23:35:02.088Z"}],"activity_records":[{"id":1734740865158,"note_id":1734737659334,"started_at":"2024-12-21T00:27:45.158Z","completed_at":null,"time_to_complete":null},{"id":1734741350303,"note_id":1734740822704,"started_at":"2024-12-21T00:35:50.303Z","completed_at":null,"time_to_complete":null},{"id":1734885109759,"note_id":1734737997569,"started_at":"2024-12-22T16:31:49.759Z","completed_at":null,"time_to_complete":null}]}
+{
+  "notes": [
+    { "id": 1734737659334, "description": "Clean coffee table", "time_estimation": 5, "label": "", "recurring": false },
+    { "id": 1734737677836, "description": "just testing", "time_estimation": 17, "label": "buckettt", "recurring": true },
+    { "id": 1734737715072, "description": "is it working?", "time_estimation": 35, "label": "important", "recurring": false },
+    { "id": 1734737997569, "description": "testing 2", "time_estimation": 2, "label": "buckettt", "recurring": true },
+    { "id": 1734740822704, "description": "houdy", "time_estimation": 25, "label": "", "recurring": false },
+    { "id": 1734740833700, "description": "jhjskj", "time_estimation": 60, "label": "", "recurring": false },
+    { "id": 1734740841718, "description": "sdd", "time_estimation": 240, "label": "", "recurring": false }
+  ],
+  "labeled_buckets": [
+    { "id": 1734737643533, "title": "buckettt", "created_at": "2024-12-20T23:34:03.533Z" },
+    { "id": 1734737702088, "title": "important", "created_at": "2024-12-20T23:35:02.088Z" }
+  ],
+  "activity_records": [
+    { "id": 1734740865158, "note_id": 1734737659334, "started_at": "2024-12-21T00:27:45.158Z", "completed_at": null, "time_to_complete": null },
+    { "id": 1734741350303, "note_id": 1734740822704, "started_at": "2024-12-21T00:35:50.303Z", "completed_at": null, "time_to_complete": null },
+    { "id": 1734885109759, "note_id": 1734737997569, "started_at": "2024-12-22T16:31:49.759Z", "completed_at": null, "time_to_complete": null }
+  ]
+}

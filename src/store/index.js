@@ -1,7 +1,8 @@
 import Vue from 'vue'
 import Vuex from 'vuex'
+import { TIME_BUCKETS } from '@/utils/constants'
 import { saveData, loadData } from '../utils/fileService'
-import { Note, ActivityRecord, LabeledBucket, AppContent } from '@/utils/dto'
+import { Note, ActivityRecord, LabeledBucket, BucketModel } from '@/utils/dto'
 
 Vue.use(Vuex)
 
@@ -9,12 +10,11 @@ export default new Vuex.Store({
   state: {
     notes: [],
     labeledBuckets: [],
-    activityRecords: [],
-    buckets: []
+    activityRecords: []
   },
   getters: {
     inProgressRecords: state => {
-      const incompleteActivities = state.activityRecords.filter(record => !record.completed_at)
+      const incompleteActivities = state.activityRecords.filter(record => !record.completedAt)
       return incompleteActivities
         .map(activity => {
           return {
@@ -23,20 +23,37 @@ export default new Vuex.Store({
           }
         })
         .filter(record => record.note)
+    },
+    buckets: state => {
+      const timeBuckets = TIME_BUCKETS.map(bucket => {
+        const notes = state.notes.filter(note => !note.label && note.timeEstimation >= bucket.min && note.timeEstimation <= bucket.max)
+        return new BucketModel({
+          ...bucket,
+          notes,
+          activityRecords: state.activityRecords.filter(record => notes.some(note => note.id === record.noteId))
+        })
+      })
+      const labeledBuckets = state.labeledBuckets.map(bucket => {
+        const notes = state.notes.filter(note => note.label === bucket.title)
+        return new BucketModel({
+          ...bucket,
+          labeled: true,
+          notes,
+          activityRecords: state.activityRecords.filter(record => notes.some(note => note.id === record.noteId))
+        })
+      })
+      return [...timeBuckets, ...labeledBuckets]
     }
   },
   mutations: {
     setNotes(state, notes) {
-      state.notes = notes
+      Vue.set(state, 'notes', notes)
     },
     setLabeledBuckets(state, buckets) {
-      state.labeledBuckets = buckets
-    },
-    setBuckets(state, buckets) {
-      state.buckets = buckets
+      Vue.set(state, 'labeledBuckets', buckets)
     },
     setActivityRecords(state, records) {
-      state.activityRecords = records
+      Vue.set(state, 'activityRecords', records)
     },
     addNote(state, note) {
       state.notes.push(note)
@@ -48,7 +65,10 @@ export default new Vuex.Store({
       }
     },
     deleteNote(state, noteId) {
-      state.notes = state.notes.filter(note => note.id !== noteId)
+      const index = state.notes.findIndex(note => note.id === noteId)
+      if (index !== -1) {
+        state.notes.splice(index, 1)
+      }
     },
     addActivityRecordFromNote(state, record) {
       state.activityRecords.push(record)
@@ -78,8 +98,8 @@ export default new Vuex.Store({
     async saveData({ state }) {
       const data = {
         notes: state.notes.map(note => Note.clientToServer(note)),
-        labeled_buckets: state.labeledBuckets.map(bucket => LabeledBucket.clientToServer(bucket)),
-        activity_records: state.activityRecords.map(record => ActivityRecord.clientToServer(record))
+        activity_records: state.activityRecords.map(record => ActivityRecord.clientToServer(record)),
+        labeled_buckets: state.labeledBuckets.map(bucket => LabeledBucket.clientToServer(bucket))
       }
       await saveData(data)
     },
@@ -87,11 +107,17 @@ export default new Vuex.Store({
       try {
         const data = await loadData()
         if (data) {
-          const appContent = new AppContent(data)
-          commit('setNotes', appContent.notes)
-          commit('setActivityRecords', appContent.activityRecords)
-          commit('setLabeledBuckets', appContent.labeledBuckets)
-          commit('setBuckets', appContent.buckets)
+          // Notes
+          const notes = data.notes.map(note => Note.serverToClient(note))
+          commit('setNotes', notes)
+
+          // Activity Records
+          const activityRecords = data.activity_records.map(record => ActivityRecord.serverToClient(record))
+          commit('setActivityRecords', activityRecords)
+
+          // Labeled Buckets
+          const labeledBuckets = data.labeled_buckets.map(bucket => LabeledBucket.serverToClient(bucket))
+          commit('setLabeledBuckets', labeledBuckets)
         }
       } catch (error) {
         console.error('Failed to load data:', error)

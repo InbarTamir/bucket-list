@@ -16,7 +16,7 @@
         <span class="number">{{ bucket.stats.pending }}</span>
         <span class="label">Pending</span>
       </div>
-      <div class="count">
+      <div :class="['count', { 'in-progress': bucket.stats.inProgress > 0 }]">
         <span class="number">{{ bucket.stats.inProgress }}</span>
         <span class="label">In-Progress</span>
       </div>
@@ -110,6 +110,7 @@ export default {
 
 <style lang="scss" scoped>
 .bucket {
+  width: fit-content;
   background: white;
   border-radius: 8px;
   padding: 20px;
@@ -120,10 +121,6 @@ export default {
   &:hover {
     transform: translateY(-2px);
     box-shadow: 0 4px 8px var(--shadow);
-  }
-
-  &.in-progress-shadow {
-    box-shadow: 0 0 7px 7px rgba(255, 0, 0, 0.2);
   }
 
   &.bucket-completed {
@@ -189,6 +186,10 @@ export default {
         color: var(--dark);
         opacity: 0.8;
         white-space: nowrap;
+      }
+
+      &.in-progress .number {
+        color: var(--danger);
       }
 
       &.completed .number {

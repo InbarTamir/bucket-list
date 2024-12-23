@@ -63,8 +63,8 @@ export default {
     }
   },
   computed: {
-    ...mapState(['notes', 'buckets']),
-    ...mapGetters(['inProgressRecords']),
+    ...mapState(['notes']),
+    ...mapGetters(['buckets', 'inProgressRecords']),
     labeledBuckets() {
       return this.buckets.filter(bucket => bucket.labeled)
     },
@@ -131,9 +131,9 @@ export default {
       }
 
       .buckets-container {
-        display: grid;
-        grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-        gap: 1rem;
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.5rem;
       }
     }
   }
