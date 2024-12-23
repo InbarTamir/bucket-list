@@ -18,7 +18,10 @@
   --dark: #343a40;
   --light: #f8f9fa;
   --shadow: rgba(0, 0, 0, 0.1);
-  --action: #4dabf7; // Lighter, softer blue
+  --action: #4dabf7;
+  --special: #e680ff;
+  --special-dark: #cd00ff;
+  --active-number: #ff841c;
 }
 
 * {
@@ -80,6 +83,10 @@ button {
   background: var(--primary);
   color: white;
 
+  svg {
+    margin-right: 6px;
+  }
+
   &:hover {
     opacity: 0.9;
     transform: translateY(-1px);
@@ -104,14 +111,13 @@ button {
   }
 
   &.outlined {
-    background: transparent;
-    border: 1px solid var(--primary);
-    color: var(--primary);
-    font-weight: 800;
+    background: var(--special);
+    border: 1px solid var(--special);
+    color: white;
 
     &:hover {
-      background: var(--primary);
-      color: white;
+      background: white;
+      color: var(--special);
     }
   }
 }

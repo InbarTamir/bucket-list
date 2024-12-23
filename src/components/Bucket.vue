@@ -29,8 +29,8 @@
     <div class="bucket-actions">
       <button v-if="showAddButton" @click="addNote">Add Note</button>
       <template v-if="pendingNotes.length">
-        <button class="outlined" @click="randomNote">Random</button>
-        <button class="outlined" @click="pickNote">Pick</button>
+        <button class="outlined" @click="randomNote"><font-awesome-icon icon="dice" /> Random</button>
+        <button class="outlined" @click="pickNote"><font-awesome-icon icon="hand-pointer" /> Pick</button>
       </template>
     </div>
 
@@ -142,7 +142,7 @@ export default {
 
     .time-indicator {
       font-size: 0.5em;
-      color: var(--danger); // Changed from active to danger
+      color: var(--special-dark);
       padding: 2px 6px;
       border-radius: 4px;
       font-weight: normal;
@@ -189,7 +189,7 @@ export default {
       }
 
       &.in-progress .number {
-        color: var(--danger);
+        color: var(--active-number);
         animation: bounce 0.8s ease-in-out infinite; // Slightly faster animation
         font-weight: 900;
       }
