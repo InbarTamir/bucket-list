@@ -29,8 +29,8 @@
     <div class="bucket-actions">
       <button v-if="showAddButton" @click="addNote">Add Note</button>
       <template v-if="pendingNotes.length">
-        <button class="secondary" @click="randomNote">Random</button>
-        <button class="secondary" @click="pickNote">Pick</button>
+        <button class="outlined" @click="randomNote">Random</button>
+        <button class="outlined" @click="pickNote">Pick</button>
       </template>
     </div>
 

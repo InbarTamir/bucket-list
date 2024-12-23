@@ -18,6 +18,7 @@
   --dark: #343a40;
   --light: #f8f9fa;
   --shadow: rgba(0, 0, 0, 0.1);
+  --action: #4dabf7; // Lighter, softer blue
 }
 
 * {
@@ -96,6 +97,22 @@ button {
 
   &.secondary {
     background: var(--secondary);
+  }
+
+  &.action {
+    background: var(--action);
+  }
+
+  &.outlined {
+    background: transparent;
+    border: 1px solid var(--primary);
+    color: var(--primary);
+    font-weight: 800;
+
+    &:hover {
+      background: var(--primary);
+      color: white;
+    }
   }
 }
 
