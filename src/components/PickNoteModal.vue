@@ -23,6 +23,9 @@
               <td>{{ note.timeEstimation }}m</td>
               <td>
                 <button @click="startNote(note)" :disabled="note.status === 'in-progress'">Start</button>
+                <button class="danger" data-tooltip="Delete" @click="deleteNote(note)">
+                  <font-awesome-icon icon="trash" />
+                </button>
               </td>
             </tr>
           </tbody>
@@ -38,11 +41,16 @@
 </template>
 
 <script>
+import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
+
 export default {
   props: {
     show: Boolean,
     bucket: Object,
     notes: Array
+  },
+  components: {
+    FontAwesomeIcon
   },
   data() {
     return {
@@ -75,6 +83,9 @@ export default {
     startNote(note) {
       this.$emit('start', note)
       this.$emit('close')
+    },
+    deleteNote(note) {
+      this.$emit('delete', note)
     }
   }
 }
@@ -135,6 +146,25 @@ export default {
     td {
       padding: 1rem;
       border-bottom: 1px solid var(--light);
+
+      [data-tooltip] {
+        position: relative;
+
+        &:hover::after {
+          content: attr(data-tooltip);
+          position: absolute;
+          bottom: 100%;
+          left: 50%;
+          transform: translateX(-50%);
+          padding: 4px 8px;
+          border-radius: 4px;
+          background: var(--dark);
+          color: white;
+          font-size: 0.8rem;
+          white-space: nowrap;
+          pointer-events: none;
+        }
+      }
     }
   }
 }

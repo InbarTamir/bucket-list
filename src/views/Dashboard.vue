@@ -49,8 +49,8 @@
       </div>
     </div>
 
-    <create-note-modal v-if="showCreateNoteModal" :selected-bucket="selectedBucket" @close="closeCreateNoteModal" @submit="createNote" />
-    <create-bucket-form v-if="showCreateBucketModal" @close="showCreateBucketModal = false" />
+    <create-note-modal v-if="showCreateNoteModal" :selected-bucket="selectedBucket" @close="closeCreateNoteModal" @submit="createNote" @delete-note="deleteNote" />
+    <create-bucket-form v-if="showCreateBucketModal" @close="showCreateBucketModal = false" @delete-note="deleteNote" />
   </div>
 </template>
 
@@ -110,6 +110,9 @@ export default {
     },
     discardNote(activity) {
       this.$store.dispatch('discardNote', activity)
+    },
+    deleteNote(note) {
+      this.$store.dispatch('deleteNote', note.id)
     }
   }
 }

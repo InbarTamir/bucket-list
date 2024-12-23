@@ -13,7 +13,10 @@
         <div class="actions">
           <button @click="startNote">Start</button>
           <button v-if="notes.length > 1" class="secondary" @click="nextNote">Next Random</button>
-          <button class="danger" @click="$emit('close')">Close</button>
+          <button class="danger" data-tooltip="Delete" @click="deleteNote">
+            <font-awesome-icon icon="trash" />
+          </button>
+          <button class="secondary" @click="$emit('close')">Close</button>
         </div>
       </div>
 
@@ -26,11 +29,16 @@
 </template>
 
 <script>
+import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
+
 export default {
   props: {
     show: Boolean,
     bucket: Object,
     notes: Array
+  },
+  components: {
+    FontAwesomeIcon
   },
   data() {
     return {
@@ -70,6 +78,10 @@ export default {
       this.$emit('close')
     },
     nextNote() {
+      this.pickRandomNote()
+    },
+    deleteNote() {
+      this.$emit('delete', this.currentNote)
       this.pickRandomNote()
     }
   }
@@ -123,6 +135,25 @@ export default {
       display: flex;
       gap: 1rem;
       justify-content: flex-end;
+
+      [data-tooltip] {
+        position: relative;
+
+        &:hover::after {
+          content: attr(data-tooltip);
+          position: absolute;
+          bottom: 100%;
+          left: 50%;
+          transform: translateX(-50%);
+          padding: 4px 8px;
+          border-radius: 4px;
+          background: var(--dark);
+          color: white;
+          font-size: 0.8rem;
+          white-space: nowrap;
+          pointer-events: none;
+        }
+      }
     }
   }
 

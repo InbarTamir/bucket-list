@@ -34,9 +34,9 @@
       </template>
     </div>
 
-    <random-note-modal :show="showRandomModal" :bucket="bucket" :notes="pendingNotes" @close="closeRandomModal" @start="startNote" />
+    <random-note-modal :show="showRandomModal" :bucket="bucket" :notes="pendingNotes" @close="closeRandomModal" @start="startNote" @delete="deleteNote" />
 
-    <pick-note-modal :show="showPickModal" :bucket="bucket" :notes="pendingNotes" @close="closePickModal" @start="startNote" />
+    <pick-note-modal :show="showPickModal" :bucket="bucket" :notes="pendingNotes" @close="closePickModal" @start="startNote" @delete="deleteNote" />
   </div>
 </template>
 
@@ -102,6 +102,9 @@ export default {
     },
     closePickModal() {
       this.showPickModal = false
+    },
+    deleteNote(note) {
+      this.$emit('delete-note', note)
     }
   }
 }
