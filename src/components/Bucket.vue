@@ -69,12 +69,11 @@ export default {
     pendingNotes() {
       return this.bucket.notesMap.pending
     },
-    // TODO: use or remove
     inProgressNotes() {
       return this.bucket.notesMap.inProgress
     },
     isDone() {
-      return this.bucket.stats.pending === 0 && this.bucket.stats.inProgress === 0
+      return !this.bucket.labeled && this.bucket.stats.pending === 0 && this.bucket.stats.inProgress === 0
     },
     timeEstimation() {
       if (!this.bucket.max) return null

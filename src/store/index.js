@@ -134,10 +134,9 @@ export default new Vuex.Store({
       await dispatch('saveData')
     },
 
-    async finishNote({ commit, dispatch }, record) {
+    async finishNote({ commit, dispatch, state }, record) {
       const completedAt = new Date().toISOString()
       const minutesDiff = (new Date(completedAt) - new Date(record.startedAt)) / 1000 / 60
-      // Ensure at least 0.1 minutes and round to 1 decimal place
       const timeToComplete = Math.max(0.1, Math.round(minutesDiff * 10) / 10)
 
       const updatedRecord = ActivityRecord.update(record, {
@@ -145,7 +144,16 @@ export default new Vuex.Store({
         timeToComplete
       })
 
+      // Find the note to check if it's recurring
+      const note = state.notes.find(n => n.id === record.noteId)
+
       commit('updateActivityRecord', updatedRecord)
+
+      // If note exists and is not recurring, remove it
+      if (note && !note.recurring) {
+        commit('deleteNote', note.id)
+      }
+
       await dispatch('saveData')
     },
     async deleteNote({ commit, dispatch }, noteId) {
