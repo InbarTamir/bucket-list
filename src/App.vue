@@ -84,7 +84,34 @@ button {
   color: white;
 
   svg {
-    margin-right: 6px;
+    margin: 0; // Remove margin since we're not using labels anymore
+  }
+
+  &[data-tooltip] {
+    position: relative;
+
+    &:before {
+      content: attr(data-tooltip);
+      position: absolute;
+      bottom: 100%;
+      left: 50%;
+      transform: translateX(-50%);
+      margin-bottom: 8px;
+      padding: 4px 8px;
+      border-radius: 4px;
+      background: var(--dark);
+      color: white;
+      font-size: 12px;
+      white-space: nowrap;
+      opacity: 0;
+      visibility: hidden;
+      transition: all 0.2s ease;
+    }
+
+    &:hover:before {
+      opacity: 1;
+      visibility: visible;
+    }
   }
 
   &:hover {
@@ -119,6 +146,14 @@ button {
       background: white;
       color: var(--special);
     }
+  }
+
+  &.success {
+    background: var(--success);
+  }
+
+  &.active {
+    background: var(--active-number);
   }
 }
 

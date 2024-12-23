@@ -5,9 +5,9 @@ import store from './store'
 
 import { library } from '@fortawesome/fontawesome-svg-core'
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
-import { faClock, faDice, faHandPointer } from '@fortawesome/free-solid-svg-icons'
+import { faClock, faDice, faHandPointer, faRotateRight, faTrash, faCheck } from '@fortawesome/free-solid-svg-icons'
 
-library.add(faClock, faDice, faHandPointer)
+library.add(faClock, faDice, faHandPointer, faRotateRight, faTrash, faCheck)
 
 Vue.config.productionTip = false
 Vue.component('font-awesome-icon', FontAwesomeIcon)

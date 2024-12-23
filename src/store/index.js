@@ -81,16 +81,16 @@ export default new Vuex.Store({
         createdAt: new Date().toISOString()
       })
     },
-    updateNoteStatus(state, { noteId, status }) {
-      const note = state.notes.find(n => n.id === noteId)
-      if (note) {
-        note.status = status
-      }
-    },
     updateActivityRecord(state, updatedRecord) {
       const index = state.activityRecords.findIndex(record => record.id === updatedRecord.id)
       if (index !== -1) {
         Vue.set(state.activityRecords, index, updatedRecord)
+      }
+    },
+    discardNote(state, record) {
+      const index = state.activityRecords.findIndex(r => r.id === record.id)
+      if (index !== -1) {
+        state.activityRecords.splice(index, 1)
       }
     }
   },
@@ -134,21 +134,17 @@ export default new Vuex.Store({
       await dispatch('saveData')
     },
 
-    async finishNote({ commit, state, dispatch }, noteId) {
-      const activityRecord = state.activityRecords.find(record => record.noteId === noteId && !record.completedAt)
+    async finishNote({ commit, dispatch }, record) {
+      const completedAt = new Date().toISOString()
+      const timeToComplete = Math.round((new Date(completedAt) - new Date(record.startedAt)) / 1000 / 60)
 
-      if (activityRecord) {
-        const completedAt = new Date().toISOString()
-        const timeToComplete = Math.round((new Date(completedAt) - new Date(activityRecord.startedAt)) / 1000 / 60)
+      const updatedRecord = ActivityRecord.update(record, {
+        completedAt,
+        timeToComplete
+      })
 
-        const updatedRecord = ActivityRecord.update(activityRecord, {
-          completedAt,
-          timeToComplete
-        })
-
-        commit('updateActivityRecord', updatedRecord)
-        await dispatch('saveData')
-      }
+      commit('updateActivityRecord', updatedRecord)
+      await dispatch('saveData')
     },
     async deleteNote({ commit, dispatch }, noteId) {
       commit('deleteNote', noteId)
@@ -156,6 +152,17 @@ export default new Vuex.Store({
     },
     async addLabeledBucket({ commit, dispatch }, bucket) {
       commit('addLabeledBucket', bucket)
+      await dispatch('saveData')
+    },
+    async restartNote({ commit, dispatch }, record) {
+      const updatedRecord = ActivityRecord.update(record, {
+        startedAt: new Date().toISOString()
+      })
+      commit('updateActivityRecord', updatedRecord)
+      await dispatch('saveData')
+    },
+    async discardNote({ commit, dispatch }, record) {
+      commit('discardNote', record)
       await dispatch('saveData')
     }
   },

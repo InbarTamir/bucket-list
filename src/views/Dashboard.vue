@@ -32,8 +32,15 @@
             <span class="started-at">Started: {{ Helpers.formatDateTime(activity.startedAt) }}</span>
           </div>
           <div class="actions">
-            <button @click="finishNote(note)">Finish</button>
-            <button class="danger" @click="resetNote(note)">Reset</button>
+            <button class="active" data-tooltip="Restart" @click="restartNote(activity)">
+              <font-awesome-icon icon="rotate-right" />
+            </button>
+            <button class="success" data-tooltip="Finish" @click="finishNote(activity)">
+              <font-awesome-icon icon="check" />
+            </button>
+            <button class="danger" data-tooltip="Discard" @click="discardNote(activity)">
+              <font-awesome-icon icon="trash" />
+            </button>
           </div>
         </div>
       </div>
@@ -92,11 +99,17 @@ export default {
     startNote(noteData) {
       this.$store.dispatch('startNote', noteData)
     },
-    finishNote(note) {
-      this.$store.dispatch('finishNote', note.id)
+    finishNote(activity) {
+      this.$store.dispatch('finishNote', activity)
     },
     resetNote(note) {
       this.$store.dispatch('resetNote', note.id)
+    },
+    restartNote(activity) {
+      this.$store.dispatch('restartNote', activity)
+    },
+    discardNote(activity) {
+      this.$store.dispatch('discardNote', activity)
     }
   }
 }
@@ -175,7 +188,7 @@ export default {
           }
 
           .label {
-            background: var(--active);
+            background: var(--primary);
             color: white;
             padding: 0.2rem 0.5rem;
             border-radius: 4px;
