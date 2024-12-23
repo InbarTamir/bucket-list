@@ -10,12 +10,13 @@
 
 <style lang="scss">
 :root {
-  --primary: #3498db;
-  --secondary: #2ecc71;
-  --danger: #e74c3c;
-  --warning: #f1c40f;
-  --dark: #34495e;
-  --light: #ecf0f1;
+  --primary: #38acf7;
+  --secondary: #6c757d;
+  --success: #28a745;
+  --danger: #dc3545;
+  --danger-rgb: 220, 53, 69;
+  --dark: #343a40;
+  --light: #f8f9fa;
   --shadow: rgba(0, 0, 0, 0.1);
 }
 

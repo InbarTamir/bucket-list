@@ -142,7 +142,7 @@ export default {
 
     .time-indicator {
       font-size: 0.5em;
-      color: var(--danger, #dc3545);
+      color: var(--danger); // Changed from active to danger
       padding: 2px 6px;
       border-radius: 4px;
       font-weight: normal;
@@ -190,12 +190,24 @@ export default {
 
       &.in-progress .number {
         color: var(--danger);
+        animation: bounce 0.8s ease-in-out infinite; // Slightly faster animation
+        font-weight: 900;
       }
 
       &.completed .number {
-        color: var(--secondary);
+        color: var(--success);
       }
     }
+  }
+}
+
+@keyframes bounce {
+  0%,
+  100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.2); // Slightly bigger bounce
   }
 }
 </style>

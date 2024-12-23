@@ -175,7 +175,7 @@ export default {
           }
 
           .label {
-            background: var(--primary);
+            background: var(--active);
             color: white;
             padding: 0.2rem 0.5rem;
             border-radius: 4px;
