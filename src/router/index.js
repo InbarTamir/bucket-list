@@ -8,8 +8,9 @@ Vue.use(VueRouter)
 const routes = [
   {
     path: '/',
-    name: 'home',
-    component: Dashboard
+    name: 'dashboard',
+    component: Dashboard,
+    exact: true // Only match exact path
   },
   {
     path: '/activity',
