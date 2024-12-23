@@ -5,6 +5,9 @@ import ActivityView from '../views/ActivityView.vue'
 
 Vue.use(VueRouter)
 
+// Add this before routes
+const useHashMode = window.location.href.includes('github.io')
+
 const routes = [
   {
     path: '/',
@@ -20,7 +23,7 @@ const routes = [
 ]
 
 const router = new VueRouter({
-  mode: 'history',
+  mode: useHashMode ? 'hash' : 'history',
   base: process.env.BASE_URL,
   routes
 })

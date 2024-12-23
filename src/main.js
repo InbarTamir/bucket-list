@@ -7,9 +7,10 @@ import 'vue-toastification/dist/index.css'
 
 import { library } from '@fortawesome/fontawesome-svg-core'
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
-import { faClock, faDice, faHandPointer, faRotateRight, faTrash, faCheck, faArrowUp, faArrowDown, faFolderPlus, faFileSignature } from '@fortawesome/free-solid-svg-icons'
+import { faClock, faDice, faHandPointer, faRotateRight, faTrash, faCheck, faArrowUp, faArrowDown, faFolderPlus, faFileSignature, faFileExport, faFileImport, faSpinner } from '@fortawesome/free-solid-svg-icons'
+import { isIndexedDBAvailable } from '@/utils/dataService'
 
-library.add(faClock, faDice, faHandPointer, faRotateRight, faTrash, faCheck, faArrowUp, faArrowDown, faFolderPlus, faFileSignature)
+library.add(faClock, faDice, faHandPointer, faRotateRight, faTrash, faCheck, faArrowUp, faArrowDown, faFolderPlus, faFileSignature, faFileExport, faFileImport, faSpinner)
 
 Vue.config.productionTip = false
 Vue.component('font-awesome-icon', FontAwesomeIcon)
@@ -33,11 +34,28 @@ const toastOptions = {
 // Use toast plugin
 Vue.use(Toast, toastOptions)
 
-// Load data before mounting the app
-store.dispatch('loadData').then(() => {
-  new Vue({
-    router,
-    store,
-    render: h => h(App)
-  }).$mount('#app')
-})
+// Update app initialization
+async function initApp() {
+  try {
+    // Check if IndexedDB is available
+    const dbAvailable = await isIndexedDBAvailable()
+    if (!dbAvailable) {
+      Vue.$toast.warning('Local storage is not available. Your data will not persist.')
+    }
+
+    // Load data
+    await store.dispatch('loadData')
+
+    // Mount app
+    new Vue({
+      router,
+      store,
+      render: h => h(App)
+    }).$mount('#app')
+  } catch (error) {
+    console.error('Failed to initialize app:', error)
+    Vue.$toast.error('Failed to load application data')
+  }
+}
+
+initApp()

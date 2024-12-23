@@ -3,6 +3,16 @@
     <div class="dashboard-header">
       <h1>Notes Dashboard</h1>
       <div class="actions">
+        <div class="file-actions">
+          <button class="secondary" :disabled="isExporting" @click="exportData">
+            <font-awesome-icon :icon="isExporting ? 'spinner' : 'file-export'" :spin="isExporting" />
+            {{ isExporting ? 'Exporting...' : 'Export' }}
+          </button>
+          <button class="secondary" :disabled="isImporting" @click="importData">
+            <font-awesome-icon :icon="isImporting ? 'spinner' : 'file-import'" :spin="isImporting" />
+            {{ isImporting ? 'Importing...' : 'Import' }}
+          </button>
+        </div>
         <button class="primary prominent" @click="showCreateBucketModal = true"><font-awesome-icon icon="folder-plus" /> Create Bucket</button>
         <button class="success prominent" @click="showCreateNoteModal = true"><font-awesome-icon icon="file-signature" /> Create Note</button>
       </div>
@@ -73,7 +83,9 @@ export default {
       Helpers,
       showCreateNoteModal: false,
       selectedBucket: null,
-      showCreateBucketModal: false
+      showCreateBucketModal: false,
+      isExporting: false,
+      isImporting: false
     }
   },
   computed: {
@@ -113,6 +125,22 @@ export default {
     },
     deleteNote(note) {
       this.$store.dispatch('deleteNote', note.id)
+    },
+    async exportData() {
+      this.isExporting = true
+      try {
+        await this.$store.dispatch('exportToFile')
+      } finally {
+        this.isExporting = false
+      }
+    },
+    async importData() {
+      this.isImporting = true
+      try {
+        await this.$store.dispatch('importFromFile')
+      } finally {
+        this.isImporting = false
+      }
     }
   }
 }
@@ -136,6 +164,14 @@ export default {
     .actions {
       display: flex;
       gap: 1rem;
+
+      .file-actions {
+        display: flex;
+        gap: 0.5rem;
+        margin-right: 1rem;
+        padding-right: 1rem;
+        border-right: 1px solid var(--light);
+      }
     }
   }
 

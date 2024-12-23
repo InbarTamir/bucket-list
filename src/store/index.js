@@ -1,7 +1,8 @@
 import Vue from 'vue'
 import Vuex from 'vuex'
 import { TIME_BUCKETS } from '@/utils/constants'
-import { saveData, loadData } from '../utils/fileService'
+import { saveToIndexedDB, loadFromIndexedDB } from '@/utils/dataService'
+import { downloadBackup, uploadBackup } from '@/utils/fileService'
 import { Note, ActivityRecord, LabeledBucket, BucketModel } from '@/utils/dto'
 
 Vue.use(Vuex)
@@ -87,26 +88,31 @@ export default new Vuex.Store({
     }
   },
   actions: {
-    async saveData({ state }) {
-      const data = {
+    // Add this helper method
+    _getNormalizedData({ state }) {
+      return {
         notes: state.notes.map(note => Note.clientToServer(note)),
         activity_records: state.activityRecords.map(record => ActivityRecord.clientToServer(record)),
         labeled_buckets: state.labeledBuckets.map(bucket => LabeledBucket.clientToServer(bucket))
       }
-      await saveData(data)
     },
+
+    async saveData({ dispatch }) {
+      const data = await dispatch('_getNormalizedData')
+      await saveToIndexedDB(data)
+    },
+
     async loadData({ commit }) {
       try {
-        const data = await loadData()
+        // Only try loading from IndexedDB
+        const data = await loadFromIndexedDB()
+
         if (data) {
-          // Notes
           const notes = data.notes.map(note => Note.serverToClient(note))
           commit('setNotes', notes)
-
           // Activity Records
           const activityRecords = data.activity_records.map(record => ActivityRecord.serverToClient(record))
           commit('setActivityRecords', activityRecords)
-
           // Labeled Buckets
           const labeledBuckets = data.labeled_buckets.map(bucket => LabeledBucket.serverToClient(bucket))
           commit('setLabeledBuckets', labeledBuckets)
@@ -115,6 +121,31 @@ export default new Vuex.Store({
         console.error('Failed to load data:', error)
       }
     },
+
+    // Add new export/import actions
+    async exportToFile({ dispatch }) {
+      try {
+        const data = await dispatch('_getNormalizedData')
+        await downloadBackup(data)
+        Vue.$toast.success('Data exported successfully')
+      } catch (error) {
+        Vue.$toast.error(`Export failed: ${error.message}`)
+      }
+    },
+
+    async importFromFile({ dispatch }) {
+      try {
+        const data = await uploadBackup()
+        if (data) {
+          await saveToIndexedDB(data)
+          await dispatch('loadData')
+          Vue.$toast.success('Data imported successfully')
+        }
+      } catch (error) {
+        Vue.$toast.error(`Import failed: ${error.message}`)
+      }
+    },
+
     async addNote({ commit, dispatch }, note) {
       commit('addNote', note)
       await dispatch('saveData')

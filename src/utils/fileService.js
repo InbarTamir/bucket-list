@@ -9,7 +9,7 @@ async function showError(message) {
   Vue.$toast.error(message)
 }
 
-async function getFileHandle() {
+async function getFileHandle(userInitiated = false) {
   try {
     if (fileHandle) return fileHandle
 
@@ -17,6 +17,10 @@ async function getFileHandle() {
     if (storedHandle) {
       fileHandle = storedHandle
       return fileHandle
+    }
+
+    if (!userInitiated) {
+      throw new Error('File access requires user interaction')
     }
 
     if ('showSaveFilePicker' in window) {
@@ -68,29 +72,58 @@ async function getStoredFileHandle() {
   }
 }
 
-export async function saveData(data) {
+async function tryFetchFile() {
   try {
-    const json = JSON.stringify(data)
-    const blob = new Blob([json], { type: 'application/json' })
-
-    const handle = await getFileHandle()
-    const writable = await handle.createWritable()
-    await writable.write(blob)
-    await writable.close()
+    // Try to load content.template.json for new installations
+    const basePath = process.env.NODE_ENV === 'production' ? '/bucket-list' : ''
+    const response = await fetch(`${basePath}/content.template.json`)
+    if (!response.ok) throw new Error('Failed to fetch content.template.json')
+    return await response.json()
   } catch (error) {
-    await showError(`Error saving data: ${error.message}`)
-    throw error
+    console.log('Template load failed:', error)
+    return null
   }
 }
 
-export async function loadData() {
-  try {
-    const handle = await getFileHandle()
-    const file = await handle.getFile()
-    const text = await file.text()
-    return JSON.parse(text)
-  } catch (error) {
-    await showError(`Error loading data: ${error.message}`)
-    throw error
-  }
+// Remove original saveData and loadData functions
+// Keep only backup-related functions
+export async function downloadBackup(data) {
+  const json = JSON.stringify(data, null, 2)
+  const blob = new Blob([json], { type: 'application/json' })
+  const url = URL.createObjectURL(blob)
+  const a = document.createElement('a')
+  a.href = url
+  a.download = getBackupFileName()
+  document.body.appendChild(a)
+  a.click()
+  document.body.removeChild(a)
+  URL.revokeObjectURL(url)
+}
+
+export async function uploadBackup() {
+  return new Promise((resolve, reject) => {
+    const input = document.createElement('input')
+    input.type = 'file'
+    input.accept = '.json'
+
+    input.onchange = async e => {
+      const file = e.target.files[0]
+      if (!file) return reject(new Error('No file selected'))
+
+      try {
+        const text = await file.text()
+        resolve(JSON.parse(text))
+      } catch (error) {
+        reject(new Error('Invalid backup file'))
+      }
+    }
+
+    input.click()
+  })
+}
+
+// Helper function
+function getBackupFileName() {
+  const date = new Date().toISOString().split('T')[0]
+  return `bucket-list-backup-${date}.json`
 }

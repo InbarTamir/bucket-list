@@ -24,3 +24,4 @@ pnpm-debug.log*
 
 # Specific data file
 */content.json
+src/content.json
