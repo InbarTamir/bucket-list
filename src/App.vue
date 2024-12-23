@@ -84,7 +84,7 @@ button {
   color: white;
 
   svg {
-    margin: 0; // Remove margin since we're not using labels anymore
+    margin-right: 6px;
   }
 
   &[data-tooltip] {
@@ -154,6 +154,21 @@ button {
 
   &.active {
     background: var(--active-number);
+  }
+
+  &.prominent {
+    font-size: 1.1rem;
+    padding: 10px 20px;
+    font-weight: 600;
+
+    svg {
+      font-size: 0.9em;
+    }
+
+    &:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 8px var(--shadow);
+    }
   }
 }
 

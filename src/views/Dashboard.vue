@@ -2,7 +2,10 @@
   <div class="dashboard">
     <div class="dashboard-header">
       <h1>Notes Dashboard</h1>
-      <button @click="showCreateNoteModal = true">Create Note</button>
+      <div class="actions">
+        <button class="primary prominent" @click="showCreateBucketModal = true"><font-awesome-icon icon="folder-plus" /> Create Bucket</button>
+        <button class="success prominent" @click="showCreateNoteModal = true"><font-awesome-icon icon="file-signature" /> Create Note</button>
+      </div>
     </div>
 
     <div class="buckets-grid">
@@ -47,6 +50,7 @@
     </div>
 
     <create-note-modal v-if="showCreateNoteModal" :selected-bucket="selectedBucket" @close="closeCreateNoteModal" @submit="createNote" />
+    <create-bucket-form v-if="showCreateBucketModal" @close="showCreateBucketModal = false" />
   </div>
 </template>
 
@@ -54,19 +58,22 @@
 import { mapGetters, mapState } from 'vuex'
 import Bucket from '../components/Bucket.vue'
 import CreateNoteModal from '../components/CreateNoteModal.vue'
+import CreateBucketForm from '../components/CreateBucketForm.vue'
 import Helpers from '@/utils/helpers'
 
 export default {
   name: 'Dashboard',
   components: {
     Bucket,
-    CreateNoteModal
+    CreateNoteModal,
+    CreateBucketForm
   },
   data() {
     return {
       Helpers,
       showCreateNoteModal: false,
-      selectedBucket: null
+      selectedBucket: null,
+      showCreateBucketModal: false
     }
   },
   computed: {
@@ -128,6 +135,11 @@ export default {
     h1 {
       color: var(--dark);
       font-size: 2rem;
+    }
+
+    .actions {
+      display: flex;
+      gap: 1rem;
     }
   }
 

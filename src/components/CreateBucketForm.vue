@@ -1,9 +1,18 @@
 <template>
-  <div class="create-bucket-form">
-    <form @submit.prevent="submitForm">
-      <input type="text" v-model="title" placeholder="Enter bucket label" required />
-      <button type="submit">Create Labeled Bucket</button>
-    </form>
+  <div class="modal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3>Create New Bucket</h3>
+      </div>
+
+      <form @submit.prevent="submitForm">
+        <input type="text" v-model="title" placeholder="Enter bucket label" required ref="titleInput" autofocus />
+        <div class="actions">
+          <button type="submit">Create</button>
+          <button type="button" class="danger" @click="$emit('close')">Cancel</button>
+        </div>
+      </form>
+    </div>
   </div>
 </template>
 
@@ -16,29 +25,57 @@ export default {
   },
   methods: {
     submitForm() {
-      this.$store.dispatch('addLabeledBucket', {
-        title: this.title
-      })
-      this.title = ''
+      this.$store.dispatch('addLabeledBucket', { title: this.title })
+      this.$emit('close')
     }
   }
 }
 </script>
 
 <style lang="scss" scoped>
-.create-bucket-form {
-  margin: 1rem;
-  padding: 1rem;
-  border: 1px solid #ddd;
-  border-radius: 4px;
+.modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
 
-  input {
-    margin-right: 1rem;
-    padding: 0.5rem;
-  }
+  .modal-content {
+    background: white;
+    border-radius: 8px;
+    padding: 2rem;
+    min-width: 400px;
 
-  button {
-    padding: 0.5rem 1rem;
+    .modal-header {
+      margin-bottom: 2rem;
+      h3 {
+        color: var(--primary);
+        font-size: 1.4rem;
+      }
+    }
+
+    form {
+      display: flex;
+      flex-direction: column;
+      gap: 1.5rem;
+
+      input {
+        width: 100%;
+        padding: 0.8rem;
+        font-size: 1rem;
+      }
+
+      .actions {
+        display: flex;
+        justify-content: flex-end;
+        gap: 1rem;
+      }
+    }
   }
 }
 </style>
