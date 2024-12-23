@@ -1,9 +1,13 @@
 import { openDB } from 'idb'
-import { toast } from 'vue-toastification'
+import Vue from 'vue'
 import 'vue-toastification/dist/index.css'
 
-const fileName = 'notes-dashboard.json'
+const fileName = 'content.json'
 let fileHandle
+
+async function showError(message) {
+  Vue.$toast.error(message)
+}
 
 async function getFileHandle() {
   try {
@@ -31,7 +35,7 @@ async function getFileHandle() {
       throw new Error('File System Access API is not supported in this browser.')
     }
   } catch (error) {
-    toast.error(`Error getting file handle: ${error.message}`)
+    await showError(`Error getting file handle: ${error.message}`)
     throw error
   }
 }
@@ -43,9 +47,9 @@ async function storeFileHandle(handle) {
         db.createObjectStore('handles')
       }
     })
-    await db.put('handles', handle, 'notes-dashboard')
+    await db.put('handles', handle, 'bucket-list')
   } catch (error) {
-    toast.error(`Error storing file handle: ${error.message}`)
+    await showError(`Error storing file handle: ${error.message}`)
     throw error
   }
 }
@@ -57,14 +61,13 @@ async function getStoredFileHandle() {
         db.createObjectStore('handles')
       }
     })
-    return await db.get('handles', 'notes-dashboard')
+    return await db.get('handles', 'bucket-list')
   } catch (error) {
-    toast.error(`Error getting stored file handle: ${error.message}`)
+    await showError(`Error getting stored file handle: ${error.message}`)
     throw error
   }
 }
 
-// TODO:
 export async function saveData(data) {
   try {
     const json = JSON.stringify(data)
@@ -75,7 +78,7 @@ export async function saveData(data) {
     await writable.write(blob)
     await writable.close()
   } catch (error) {
-    toast.error(`Error saving data: ${error.message}`)
+    await showError(`Error saving data: ${error.message}`)
     throw error
   }
 }
@@ -87,7 +90,7 @@ export async function loadData() {
     const text = await file.text()
     return JSON.parse(text)
   } catch (error) {
-    toast.error(`Error loading data: ${error.message}`)
+    await showError(`Error loading data: ${error.message}`)
     throw error
   }
 }
