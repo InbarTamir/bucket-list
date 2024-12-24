@@ -146,8 +146,12 @@ export default new Vuex.Store({
       }
     },
 
-    async addNote({ commit, dispatch }, note) {
-      commit('addNote', note)
+    async createNote({ commit, dispatch }, note) {
+      const newNote = new Note({
+        ...note,
+        id: Date.now()
+      })
+      commit('addNote', newNote)
       await dispatch('saveData')
     },
     async startNote({ commit, dispatch }, note) {

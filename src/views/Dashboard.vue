@@ -108,7 +108,7 @@ export default {
       this.selectedBucket = null
     },
     createNote(note) {
-      this.$store.dispatch('addNote', note)
+      this.$store.dispatch('createNote', note)
       this.closeCreateNoteModal()
     },
     startNote(noteData) {
