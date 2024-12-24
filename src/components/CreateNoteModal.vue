@@ -13,6 +13,16 @@
           <input id="timeEstimation" v-model.number="form.timeEstimation" type="number" required min="1" />
         </div>
 
+        <div class="form-group checkbox">
+          <label>
+            <input type="checkbox" v-model="form.recurring" />
+            Recurring
+            <span class="help-icon" data-tooltip="This note will not be removed when completed">
+              <font-awesome-icon icon="circle-question" />
+            </span>
+          </label>
+        </div>
+
         <div class="form-group" v-if="!selectedBucket">
           <label for="label">Label (optional):</label>
           <select id="label" v-model="form.label">
@@ -47,7 +57,8 @@ export default {
       form: {
         description: '',
         timeEstimation: null,
-        label: ''
+        label: '',
+        recurring: false
       }
     }
   },
@@ -89,6 +100,53 @@ export default {
 
     .form-group {
       margin-bottom: 1rem;
+
+      &.checkbox {
+        label {
+          display: flex;
+          align-items: center;
+          gap: 0.5rem;
+          cursor: pointer;
+
+          .help-icon {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--primary);
+            font-size: 14px;
+            cursor: help;
+          }
+        }
+
+        input[type='checkbox'] {
+          width: auto;
+          cursor: pointer;
+          accent-color: var(--primary);
+          width: 16px;
+          height: 16px;
+          border: 2px solid #ddd;
+          border-radius: 3px;
+          appearance: none;
+          -webkit-appearance: none;
+          position: relative;
+          background: white;
+
+          &:checked {
+            background: var(--primary);
+            border-color: var(--primary);
+          }
+
+          &:checked::after {
+            content: '✓';
+            color: white;
+            position: absolute;
+            left: 50%;
+            top: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 12px;
+          }
+        }
+      }
 
       label {
         display: block;
