@@ -21,6 +21,24 @@
     <div class="buckets-grid">
       <div class="section labeled-buckets">
         <h2>Labeled Buckets</h2>
+        <div v-if="!hasLabeledBuckets" class="getting-started">
+          <div class="getting-started-content">
+            <div class="organization-options">
+              <div class="option active">
+                <font-awesome-icon icon="folder-tree" class="feature-icon" />
+                <h3>Labeled Buckets</h3>
+                <p>Organize notes by categories</p>
+                <button class="primary" @click="showCreateBucketModal = true"><font-awesome-icon icon="folder-plus" /> Create Your First Bucket</button>
+              </div>
+              <div class="option">
+                <font-awesome-icon icon="clock" class="feature-icon" />
+                <h3>Time-Based Buckets</h3>
+                <p>Auto-organize by estimated duration</p>
+                <button class="secondary" @click="scrollToTimeBuckets"><font-awesome-icon icon="arrow-down" /> See Time Buckets</button>
+              </div>
+            </div>
+          </div>
+        </div>
         <div class="buckets-container">
           <bucket v-for="bucket in labeledBuckets" :key="bucket.id" :bucket="bucket" @add-note="openCreateNoteModal" @start-note="startNote" @delete-note="deleteNote" />
         </div>
@@ -28,6 +46,27 @@
 
       <div class="section time-buckets">
         <h2>Time-Based Buckets</h2>
+        <div v-if="!hasTimeBasedNotes" class="getting-started">
+          <div class="getting-started-content">
+            <font-awesome-icon icon="lightbulb" class="feature-icon" />
+            <h3>How Time-Based Buckets Work</h3>
+            <div class="steps">
+              <div class="step">
+                <div class="step-number">1</div>
+                <div class="step-text">Create a new note using the button below or at the top</div>
+              </div>
+              <div class="step">
+                <div class="step-number">2</div>
+                <div class="step-text">Set a time estimation for your note</div>
+              </div>
+              <div class="step">
+                <div class="step-number">3</div>
+                <div class="step-text">The note will automatically appear in the right time bucket</div>
+              </div>
+            </div>
+            <button class="success" @click="showCreateNoteModal = true"><font-awesome-icon icon="file-signature" /> Create Your First Note</button>
+          </div>
+        </div>
         <div class="buckets-container">
           <bucket v-for="bucket in timeBuckets" :key="bucket.title" :bucket="bucket" :show-add-button="false" @start-note="startNote" @delete-note="deleteNote" />
         </div>
@@ -96,6 +135,12 @@ export default {
     },
     timeBuckets() {
       return this.buckets.filter(bucket => !bucket.labeled)
+    },
+    hasTimeBasedNotes() {
+      return this.timeBuckets.some(bucket => bucket.notes.length > 0)
+    },
+    hasLabeledBuckets() {
+      return this.labeledBuckets.length > 0
     }
   },
   methods: {
@@ -141,6 +186,9 @@ export default {
       } finally {
         this.isImporting = false
       }
+    },
+    scrollToTimeBuckets() {
+      this.$el.querySelector('.time-buckets').scrollIntoView({ behavior: 'smooth' })
     }
   }
 }
@@ -191,6 +239,149 @@ export default {
         display: flex;
         flex-wrap: wrap;
         gap: 0.5rem;
+      }
+
+      .getting-started {
+        background: white;
+        border: 2px dashed var(--primary);
+        border-radius: 8px;
+        padding: 2rem;
+        margin-bottom: 1.5rem;
+
+        .getting-started-content {
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          text-align: center;
+          max-width: 600px;
+          margin: 0 auto;
+
+          .organization-options {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 2rem;
+            width: 100%;
+            margin-bottom: 2rem;
+
+            .option {
+              background: var(--light);
+              padding: 2rem;
+              border-radius: 8px;
+              display: flex;
+              flex-direction: column;
+              align-items: center;
+              gap: 1rem;
+              transition: transform 0.2s ease;
+
+              &:hover {
+                transform: translateY(-2px);
+              }
+
+              &.active {
+                background: white;
+                border: 2px dashed var(--primary);
+              }
+
+              .feature-icon {
+                font-size: 2rem;
+                color: var(--primary);
+              }
+
+              h3 {
+                font-size: 1.2rem;
+                margin: 0;
+              }
+
+              p {
+                color: var(--dark);
+                opacity: 0.8;
+                text-align: center;
+                margin-bottom: 0.5rem;
+              }
+
+              button {
+                width: 100%;
+              }
+            }
+          }
+
+          .feature-icon {
+            color: var(--primary);
+            font-size: 2.5rem;
+            margin-bottom: 1rem;
+          }
+
+          h3 {
+            color: var(--dark);
+            font-size: 1.4rem;
+            margin-bottom: 1.5rem;
+          }
+
+          .steps {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+            margin-bottom: 2rem;
+            width: 100%;
+
+            .step {
+              display: flex;
+              align-items: center;
+              gap: 1rem;
+              text-align: left;
+
+              .step-number {
+                background: var(--primary);
+                color: white;
+                width: 28px;
+                height: 28px;
+                border-radius: 50%;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                font-weight: bold;
+                flex-shrink: 0;
+              }
+
+              .step-text {
+                color: var(--dark);
+                font-size: 1.1rem;
+                line-height: 1.4;
+              }
+            }
+          }
+
+          button {
+            font-size: 1.1rem;
+            padding: 0.8rem 1.5rem;
+          }
+
+          button.primary {
+            background: var(--primary);
+            &:hover {
+              background: darken(#38acf7, 5%);
+            }
+          }
+        }
+      }
+
+      .empty-message {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        background: var(--light);
+        border: 1px solid var(--primary);
+        color: var(--dark);
+        padding: 0.75rem 1rem;
+        border-radius: 6px;
+        margin-bottom: 1rem;
+        font-size: 0.95rem;
+
+        .info-icon {
+          color: var(--primary);
+          font-size: 1.2rem;
+          flex-shrink: 0;
+        }
       }
     }
   }

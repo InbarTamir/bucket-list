@@ -29,7 +29,8 @@ export class ServerData {
     this.version = data.version || CURRENT_DATA_VERSION
     this.notes = data.notes || []
     this.activity_records = data.activityRecords || []
-    this.labeled_buckets = data.labeledBuckets || [{ id: 1, title: 'Important', createdAt: new Date().toISOString() }]
+    // this.labeled_buckets = data.labeledBuckets || [{ id: 1, title: 'Important', createdAt: new Date().toISOString() }]
+    this.labeled_buckets = data.labeledBuckets || []
   }
 }
 

@@ -1,33 +1,66 @@
 <template>
   <div class="activity-view">
-    <div class="toolbar">
-      <input type="text" v-model="searchQuery" placeholder="Search by description..." class="search-input" />
+    <div v-if="!activityRecords.length" class="empty-guide">
+      <font-awesome-icon icon="chart-line" class="feature-icon" />
+      <h2>Track Your Activities</h2>
+      <div class="features">
+        <div class="feature">
+          <div class="feature-header">
+            <font-awesome-icon icon="play" />
+            <h3>Start Notes</h3>
+          </div>
+          <p>Begin working on notes from your buckets</p>
+        </div>
+        <div class="feature">
+          <div class="feature-header">
+            <font-awesome-icon icon="stopwatch" />
+            <h3>Track Time</h3>
+          </div>
+          <p>Compare estimated vs actual completion time</p>
+        </div>
+        <div class="feature">
+          <div class="feature-header">
+            <font-awesome-icon icon="history" />
+            <h3>View History</h3>
+          </div>
+          <p>See all your completed activities here</p>
+        </div>
+      </div>
+      <router-link to="/" class="start-link">
+        <button class="primary"><font-awesome-icon icon="arrow-left" /> Go to Dashboard</button>
+      </router-link>
     </div>
-    <table>
-      <thead>
-        <tr>
-          <th v-for="column in columns" :key="column.key" @click="sort(column.key)">
-            {{ column.label }}
-            <font-awesome-icon :icon="sortOrder === 'asc' ? 'arrow-up' : 'arrow-down'" :class="['sort-icon', { active: sortKey === column.key }]" />
-          </th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr v-for="record in filteredRecords" :key="record.id">
-          <td class="description-cell">{{ record.description }}</td>
-          <td class="label-cell">
-            <span v-if="record.label" class="label">{{ record.label }}</span>
-            <span v-else>-</span>
-          </td>
-          <td class="date-cell">{{ formatDate(record.startedAt) }}</td>
-          <td class="date-cell">{{ record.completedAt ? formatDate(record.completedAt) : '-' }}</td>
-          <td class="number-cell">{{ record.timeEstimation }}m</td>
-          <td :class="['number-cell', { overdue: isOverdue(record) }]" :data-tooltip="getOverdueTooltip(record)">
-            {{ record.timeToComplete ? `${record.timeToComplete}m` : '-' }}
-          </td>
-        </tr>
-      </tbody>
-    </table>
+
+    <template v-else>
+      <div class="toolbar">
+        <input type="text" v-model="searchQuery" placeholder="Search by description..." class="search-input" />
+      </div>
+      <table>
+        <thead>
+          <tr>
+            <th v-for="column in columns" :key="column.key" @click="sort(column.key)">
+              {{ column.label }}
+              <font-awesome-icon :icon="sortOrder === 'asc' ? 'arrow-up' : 'arrow-down'" :class="['sort-icon', { active: sortKey === column.key }]" />
+            </th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr v-for="record in filteredRecords" :key="record.id">
+            <td class="description-cell">{{ record.description }}</td>
+            <td class="label-cell">
+              <span v-if="record.label" class="label">{{ record.label }}</span>
+              <span v-else>-</span>
+            </td>
+            <td class="date-cell">{{ formatDate(record.startedAt) }}</td>
+            <td class="date-cell">{{ record.completedAt ? formatDate(record.completedAt) : '-' }}</td>
+            <td class="number-cell">{{ record.timeEstimation }}m</td>
+            <td :class="['number-cell', { overdue: isOverdue(record) }]" :data-tooltip="getOverdueTooltip(record)">
+              {{ record.timeToComplete ? `${record.timeToComplete}m` : '-' }}
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </template>
   </div>
 </template>
 
@@ -232,6 +265,82 @@ export default {
           background: var(--danger);
           margin-bottom: 8px;
         }
+      }
+    }
+  }
+
+  .empty-guide {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    padding: 4rem 2rem;
+    background: white;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px var(--shadow);
+
+    .feature-icon {
+      color: var(--primary);
+      font-size: 3rem;
+      margin-bottom: 1.5rem;
+    }
+
+    h2 {
+      color: var(--dark);
+      font-size: 1.8rem;
+      margin-bottom: 2rem;
+    }
+
+    .features {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 2rem;
+      width: 100%;
+      max-width: 900px;
+      margin-bottom: 2rem;
+
+      .feature {
+        padding: 1.5rem;
+        background: var(--light);
+        border-radius: 8px;
+        transition: transform 0.2s ease;
+
+        &:hover {
+          transform: translateY(-2px);
+        }
+
+        .feature-header {
+          display: flex;
+          align-items: center;
+          gap: 0.75rem;
+          margin-bottom: 0.75rem;
+          color: var(--primary);
+
+          svg {
+            font-size: 1.2rem;
+          }
+
+          h3 {
+            font-size: 1.2rem;
+            color: var (--dark);
+          }
+        }
+
+        p {
+          color: var(--dark);
+          opacity: 0.8;
+          font-size: 1rem;
+          line-height: 1.4;
+        }
+      }
+    }
+
+    .start-link button {
+      font-size: 1.1rem;
+      padding: 0.8rem 1.5rem;
+
+      svg {
+        margin-right: 0.5rem;
       }
     }
   }

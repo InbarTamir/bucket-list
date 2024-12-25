@@ -1,9 +1,9 @@
 import Vue from 'vue'
 import Vuex from 'vuex'
 import { TIME_BUCKETS } from '@/utils/constants'
-import { saveToIndexedDB, loadFromIndexedDB, CURRENT_DATA_VERSION } from '@/utils/dataService'
+import { saveToIndexedDB, loadFromIndexedDB } from '@/utils/dataService'
 import { downloadBackup, uploadBackup } from '@/utils/fileService'
-import { Note, ActivityRecord, LabeledBucket, BucketModel } from '@/utils/dto'
+import { Note, ActivityRecord, LabeledBucket, BucketModel, ServerData } from '@/utils/dto'
 
 Vue.use(Vuex)
 
