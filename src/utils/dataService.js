@@ -3,10 +3,10 @@ import { migrateData } from './migrations'
 
 const DB_NAME = 'bucket-list-db'
 const STORE_NAME = 'app-data'
-const DB_VERSION = 2 // Increment this when schema changes
+const DB_VERSION = 1
 const MAX_SIZE_MB = 50 // Maximum size in megabytes
 const REQUIRED_FIELDS = ['notes', 'activity_records', 'labeled_buckets']
-const CURRENT_DATA_VERSION = '1.0' // Use this for data format versioning
+export const CURRENT_DATA_VERSION = '1.0'
 
 async function getDB() {
   return openDB(DB_NAME, DB_VERSION, {
@@ -43,7 +43,7 @@ function validateDataVersion(data) {
 export async function saveToIndexedDB(data) {
   try {
     validateData(data)
-    const versionedData = validateDataVersion({ ...data, version: CURRENT_DATA_VERSION })
+    const versionedData = validateDataVersion(data)
     // Check data size before saving
     const size = new Blob([JSON.stringify(versionedData)]).size / (1024 * 1024)
     if (size > MAX_SIZE_MB) {

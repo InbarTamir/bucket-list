@@ -1,7 +1,7 @@
 import Vue from 'vue'
 import Vuex from 'vuex'
 import { TIME_BUCKETS } from '@/utils/constants'
-import { saveToIndexedDB, loadFromIndexedDB } from '@/utils/dataService'
+import { saveToIndexedDB, loadFromIndexedDB, CURRENT_DATA_VERSION } from '@/utils/dataService'
 import { downloadBackup, uploadBackup } from '@/utils/fileService'
 import { Note, ActivityRecord, LabeledBucket, BucketModel } from '@/utils/dto'
 
@@ -91,6 +91,7 @@ export default new Vuex.Store({
     // Add this helper method
     _getNormalizedData({ state }) {
       return {
+        version: CURRENT_DATA_VERSION,
         notes: state.notes.map(note => Note.clientToServer(note)),
         activity_records: state.activityRecords.map(record => ActivityRecord.clientToServer(record)),
         labeled_buckets: state.labeledBuckets.map(bucket => LabeledBucket.clientToServer(bucket))
