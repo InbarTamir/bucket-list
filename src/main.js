@@ -7,10 +7,10 @@ import 'vue-toastification/dist/index.css'
 
 import { library } from '@fortawesome/fontawesome-svg-core'
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
-import { faClock, faDice, faHandPointer, faRotateRight, faTrash, faCheck, faArrowUp, faArrowDown, faFolderPlus, faFileSignature, faFileExport, faFileImport, faSpinner, faCircleQuestion, faPlay, faTimes, faCircleInfo, faLightbulb, faFolderTree, faChartLine, faStopwatch, faHistory, faArrowLeft, faPlus, faFolderOpen } from '@fortawesome/free-solid-svg-icons'
+import { faClock, faDice, faHandPointer, faRotateRight, faTrash, faCheck, faArrowUp, faArrowDown, faFolderPlus, faFileSignature, faFileExport, faFileImport, faSpinner, faCircleQuestion, faPlay, faTimes, faCircleInfo, faLightbulb, faFolderTree, faChartLine, faStopwatch, faHistory, faArrowLeft, faPlus, faFolderOpen, faEllipsisV, faChevronDown, faFilter, faFolder, faTag } from '@fortawesome/free-solid-svg-icons'
 import { isIndexedDBAvailable } from '@/utils/dataService'
 
-library.add(faClock, faDice, faHandPointer, faRotateRight, faTrash, faCheck, faArrowUp, faArrowDown, faFolderPlus, faFileSignature, faFileExport, faFileImport, faSpinner, faCircleQuestion, faPlay, faTimes, faCircleInfo, faLightbulb, faFolderTree, faChartLine, faStopwatch, faHistory, faArrowLeft, faPlus, faFolderOpen)
+library.add(faClock, faDice, faHandPointer, faRotateRight, faTrash, faCheck, faArrowUp, faArrowDown, faFolderPlus, faFileSignature, faFileExport, faFileImport, faSpinner, faCircleQuestion, faPlay, faTimes, faCircleInfo, faLightbulb, faFolderTree, faChartLine, faStopwatch, faHistory, faArrowLeft, faPlus, faFolderOpen, faEllipsisV, faChevronDown, faFilter, faFolder, faTag)
 
 Vue.config.productionTip = false
 Vue.component('font-awesome-icon', FontAwesomeIcon)

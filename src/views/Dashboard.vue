@@ -1,127 +1,154 @@
 <template>
   <div class="dashboard" role="main" :class="{ 'is-loading': isLoading }">
-    <!-- Add loading overlay -->
-    <div v-if="isLoading" class="loading-overlay">
-      <font-awesome-icon icon="spinner" spin />
-      <span>Loading...</span>
+    <!-- Loading skeleton -->
+    <div v-if="isLoading" class="skeleton-loader">
+      <div class="skeleton header"></div>
+      <div class="skeleton stats"></div>
+      <div class="skeleton buckets"></div>
     </div>
-    <!-- Skip link for keyboard users -->
-    <a href="#main-content" class="skip-link">Skip to main content</a>
 
-    <div class="dashboard-header">
-      <h1 id="main-content" tabindex="-1">Notes Dashboard</h1>
-      <div class="actions" role="toolbar" aria-label="Dashboard actions">
-        <div class="primary-actions">
-          <button class="success prominent" @click="showCreateNoteModal = true" aria-label="Create new note">
-            <font-awesome-icon icon="file-signature" />
-            Create Note
-          </button>
-          <button class="primary prominent" @click="showCreateBucketModal = true" aria-label="Create new bucket">
-            <font-awesome-icon icon="folder-plus" />
-            Create Bucket
+    <!-- Main content -->
+    <div v-else>
+      <div class="dashboard-header">
+        <div class="header-main">
+          <h1 id="main-content" tabindex="-1">Notes Dashboard</h1>
+          <button class="help-button" @click="showHelp = true">
+            <font-awesome-icon icon="circle-question" />
+            Help Guide
           </button>
         </div>
 
-        <div class="secondary-actions">
-          <button class="secondary" :disabled="isExporting" @click="exportData" aria-label="Export data">
-            <font-awesome-icon :icon="isExporting ? 'spinner' : 'file-export'" :spin="isExporting" />
-            {{ isExporting ? 'Exporting...' : 'Export' }}
-          </button>
-          <button class="secondary" :disabled="isImporting" @click="importData" aria-label="Import data">
-            <font-awesome-icon :icon="isImporting ? 'spinner' : 'file-import'" :spin="isImporting" />
-            {{ isImporting ? 'Importing...' : 'Import' }}
-          </button>
-        </div>
-      </div>
-    </div>
-
-    <!-- Show In Progress section at the top if there are active items -->
-    <div v-if="inProgressRecords.length" class="in-progress-section" role="region" aria-label="In progress items">
-      <h2>
-        <font-awesome-icon icon="clock" />
-        In Progress
-        <span class="count" aria-label="Number of items in progress"> ({{ inProgressRecords.length }}) </span>
-      </h2>
-      <div class="notes-list">
-        <div v-for="activity in inProgressRecords" :key="activity.id" class="note-item" :class="{ overdue: isOverdue(activity) }">
-          <div class="note-info">
-            <span class="description">{{ activity.description }}</span>
-            <span class="label" v-if="activity.label">{{ activity.label }}</span>
-            <span class="time">{{ activity.timeEstimation }}m</span>
-            <span class="started-at">Started: {{ Helpers.formatDateTime(activity.startedAt) }}</span>
-          </div>
-          <div class="actions">
-            <button class="active" data-tooltip="Restart" @click="restartNote(activity)">
-              <font-awesome-icon icon="rotate-right" />
+        <div class="actions" role="toolbar" aria-label="Dashboard actions">
+          <div class="primary-actions">
+            <button class="success prominent" @click="showCreateNoteModal = true">
+              <font-awesome-icon icon="file-signature" />
+              Create Note
             </button>
-            <button class="success" data-tooltip="Finish" @click="finishNote(activity)">
-              <font-awesome-icon icon="check" />
-            </button>
-            <button class="danger" data-tooltip="Discard" @click="discardNote(activity)">
-              <font-awesome-icon icon="trash" />
+            <button class="primary prominent" @click="showCreateBucketModal = true">
+              <font-awesome-icon icon="folder-plus" />
+              Create Bucket
             </button>
           </div>
+
+          <data-actions :is-exporting="isExporting" :is-importing="isImporting" @export="exportData" @import="importData" />
         </div>
       </div>
-    </div>
 
-    <div class="buckets-grid">
-      <div class="section labeled-buckets">
-        <h2>Labeled Buckets</h2>
-        <div v-if="!hasLabeledBuckets" class="getting-started">
-          <div class="getting-started-content">
-            <div class="organization-options">
-              <div class="option active">
-                <font-awesome-icon icon="folder-tree" class="feature-icon" />
-                <h3>Labeled Buckets</h3>
-                <p>Organize notes by categories</p>
-                <button class="primary" @click="showCreateBucketModal = true"><font-awesome-icon icon="folder-plus" /> Create Your First Bucket</button>
-              </div>
-              <div class="option">
-                <font-awesome-icon icon="clock" class="feature-icon" />
-                <h3>Time-Based Buckets</h3>
-                <p>Auto-organize by estimated duration</p>
-                <button class="secondary" @click="scrollToTimeBuckets"><font-awesome-icon icon="arrow-down" /> See Time Buckets</button>
-              </div>
+      <!-- Help popover -->
+      <div v-if="showHelp" class="help-popover">
+        <div class="help-content">
+          <h3>Quick Guide</h3>
+          <ul>
+            <li>Create notes and organize them in buckets</li>
+            <li>Use time-based buckets for automatic organization</li>
+            <li>Track active notes in the "In Progress" section</li>
+          </ul>
+          <button class="secondary" @click="showHelp = false">Got it!</button>
+        </div>
+      </div>
+
+      <!-- Skip link for keyboard users -->
+      <a href="#main-content" class="skip-link">Skip to main content</a>
+
+      <!-- Show In Progress section at the top if there are active items -->
+      <div v-if="inProgressRecords.length" class="in-progress-section" role="region" aria-label="In progress items">
+        <h2>
+          <font-awesome-icon icon="clock" />
+          In Progress
+          <span class="count" aria-label="Number of items in progress"> ({{ inProgressRecords.length }}) </span>
+        </h2>
+        <div class="notes-list">
+          <div v-for="activity in inProgressRecords" :key="activity.id" class="note-item" :class="{ overdue: isOverdue(activity) }">
+            <div class="note-info">
+              <span class="description">{{ activity.description }}</span>
+              <span class="label" v-if="activity.label">{{ activity.label }}</span>
+              <span class="time">{{ activity.timeEstimation }}m</span>
+              <span class="started-at">Started: {{ Helpers.formatDateTime(activity.startedAt) }}</span>
+            </div>
+            <div class="actions">
+              <button class="active" data-tooltip="Restart" @click="restartNote(activity)">
+                <font-awesome-icon icon="rotate-right" />
+              </button>
+              <button class="success" data-tooltip="Finish" @click="finishNote(activity)">
+                <font-awesome-icon icon="check" />
+              </button>
+              <button class="danger" data-tooltip="Discard" @click="discardNote(activity)">
+                <font-awesome-icon icon="trash" />
+              </button>
             </div>
           </div>
         </div>
-        <div class="buckets-container">
-          <bucket v-for="bucket in labeledBuckets" :key="bucket.id" :bucket="bucket" @add-note="openCreateNoteModal" @start-note="startNote" @delete-note="deleteNote" />
-        </div>
       </div>
 
-      <div class="section time-buckets">
-        <h2>Time-Based Buckets</h2>
-        <div v-if="!hasTimeBasedNotes" class="getting-started">
-          <div class="getting-started-content">
-            <font-awesome-icon icon="lightbulb" class="feature-icon" />
-            <h3>How Time-Based Buckets Work</h3>
-            <div class="steps">
-              <div class="step">
-                <div class="step-number">1</div>
-                <div class="step-text">Create a new note using the button below or at the top</div>
-              </div>
-              <div class="step">
-                <div class="step-number">2</div>
-                <div class="step-text">Set a time estimation for your note</div>
-              </div>
-              <div class="step">
-                <div class="step-number">3</div>
-                <div class="step-text">The note will automatically appear in the right time bucket</div>
+      <div class="buckets-grid">
+        <div class="section labeled-buckets">
+          <div class="section-header">
+            <h2>
+              <font-awesome-icon icon="tag" />
+              Labeled Buckets
+            </h2>
+            <bucket-controls @sort="sortBuckets('labeled', $event)" @filter="filterBuckets('labeled', $event)" />
+          </div>
+          <div v-if="!hasLabeledBuckets" class="getting-started">
+            <div class="getting-started-content">
+              <div class="organization-options">
+                <div class="option active">
+                  <font-awesome-icon icon="folder-tree" class="feature-icon" />
+                  <h3>Labeled Buckets</h3>
+                  <p>Organize notes by categories</p>
+                  <button class="primary" @click="showCreateBucketModal = true"><font-awesome-icon icon="folder-plus" /> Create Your First Bucket</button>
+                </div>
+                <div class="option">
+                  <font-awesome-icon icon="clock" class="feature-icon" />
+                  <h3>Time-Based Buckets</h3>
+                  <p>Auto-organize by estimated duration</p>
+                  <button class="secondary" @click="scrollToTimeBuckets"><font-awesome-icon icon="arrow-down" /> See Time Buckets</button>
+                </div>
               </div>
             </div>
-            <button class="success" @click="showCreateNoteModal = true"><font-awesome-icon icon="file-signature" /> Create Your First Note</button>
+          </div>
+          <div class="buckets-container">
+            <bucket v-for="bucket in filteredLabeledBuckets" :key="bucket.id" :bucket="bucket" @add-note="openCreateNoteModal" @start-note="startNote" @delete-note="deleteNote" />
           </div>
         </div>
-        <div class="buckets-container">
-          <bucket v-for="bucket in timeBuckets" :key="bucket.title" :bucket="bucket" :show-add-button="false" @start-note="startNote" @delete-note="deleteNote" />
+
+        <div class="section time-buckets">
+          <div class="section-header">
+            <h2>
+              <font-awesome-icon icon="clock" />
+              Time-Based Buckets
+            </h2>
+            <bucket-controls type="time" @sort="sortBuckets('time', $event)" @filter="filterBuckets('time', $event)" />
+          </div>
+          <div v-if="!hasTimeBasedNotes" class="getting-started">
+            <div class="getting-started-content">
+              <font-awesome-icon icon="lightbulb" class="feature-icon" />
+              <h3>How Time-Based Buckets Work</h3>
+              <div class="steps">
+                <div class="step">
+                  <div class="step-number">1</div>
+                  <div class="step-text">Create a new note using the button below or at the top</div>
+                </div>
+                <div class="step">
+                  <div class="step-number">2</div>
+                  <div class="step-text">Set a time estimation for your note</div>
+                </div>
+                <div class="step">
+                  <div class="step-text">The note will automatically appear in the right time bucket</div>
+                </div>
+              </div>
+              <button class="success" @click="showCreateNoteModal = true"><font-awesome-icon icon="file-signature" /> Create Your First Note</button>
+            </div>
+          </div>
+          <div class="buckets-container">
+            <bucket v-for="bucket in filteredTimeBuckets" :key="bucket.title" :bucket="bucket" :show-add-button="false" @start-note="startNote" @delete-note="deleteNote" />
+          </div>
         </div>
       </div>
-    </div>
 
-    <create-note-modal v-if="showCreateNoteModal" :selected-bucket="selectedBucket" @close="closeCreateNoteModal" @submit="createNote" @delete-note="deleteNote" />
-    <create-bucket-form v-if="showCreateBucketModal" @close="showCreateBucketModal = false" @delete-note="deleteNote" />
+      <create-note-modal v-if="showCreateNoteModal" :selected-bucket="selectedBucket" @close="closeCreateNoteModal" @submit="createNote" @delete-note="deleteNote" />
+      <create-bucket-form v-if="showCreateBucketModal" @close="showCreateBucketModal = false" @delete-note="deleteNote" />
+    </div>
   </div>
 </template>
 
@@ -131,13 +158,17 @@ import Bucket from '../components/Bucket.vue'
 import CreateNoteModal from '../components/CreateNoteModal.vue'
 import CreateBucketForm from '../components/CreateBucketForm.vue'
 import Helpers from '@/utils/helpers'
+import DataActions from '../components/DataActions.vue'
+import BucketControls from '../components/BucketControls.vue'
 
 export default {
   name: 'Dashboard',
   components: {
     Bucket,
     CreateNoteModal,
-    CreateBucketForm
+    CreateBucketForm,
+    DataActions,
+    BucketControls
   },
   data() {
     return {
@@ -147,7 +178,16 @@ export default {
       showCreateBucketModal: false,
       isExporting: false,
       isImporting: false,
-      isLoading: false
+      isLoading: false,
+      showHelp: false,
+      sortConfig: {
+        labeled: 'alpha',
+        time: 'alpha'
+      },
+      filterConfig: {
+        labeled: { hideEmpty: false, showActive: false },
+        time: { hideEmpty: false, showActive: false }
+      }
     }
   },
   computed: {
@@ -164,6 +204,18 @@ export default {
     },
     hasLabeledBuckets() {
       return this.labeledBuckets.length > 0
+    },
+    sortedLabeledBuckets() {
+      return this.sortBucketList(this.labeledBuckets, this.sortConfig.labeled)
+    },
+    filteredLabeledBuckets() {
+      return this.filterBucketList(this.sortedLabeledBuckets, this.filterConfig.labeled)
+    },
+    sortedTimeBuckets() {
+      return this.sortBucketList(this.timeBuckets, this.sortConfig.time)
+    },
+    filteredTimeBuckets() {
+      return this.filterBucketList(this.sortedTimeBuckets, this.filterConfig.time)
     }
   },
   methods: {
@@ -217,6 +269,35 @@ export default {
       const startTime = new Date(activity.startedAt).getTime()
       const estimatedEndTime = startTime + activity.timeEstimation * 60 * 1000
       return Date.now() > estimatedEndTime
+    },
+    sortBuckets(type, sortBy) {
+      this.sortConfig[type] = sortBy
+    },
+    filterBuckets(type, filters) {
+      this.filterConfig[type] = filters
+    },
+    sortBucketList(buckets, sortBy) {
+      return [...buckets].sort((a, b) => {
+        switch (sortBy) {
+          case 'time':
+            return (a.max || Infinity) - (b.max || Infinity)
+          case 'pending':
+            return b.stats.pending - a.stats.pending
+          case 'active':
+            return b.stats.inProgress - a.stats.inProgress
+          case 'total':
+            return b.notes.length - a.notes.length
+          default:
+            return a.title.localeCompare(b.title)
+        }
+      })
+    },
+    filterBucketList(buckets, filters) {
+      return buckets.filter(bucket => {
+        if (filters.hideEmpty && bucket.notes.length === 0) return false
+        if (filters.showActive && bucket.stats.inProgress === 0) return false
+        return true
+      })
     }
   }
 }
@@ -285,6 +366,22 @@ export default {
         .secondary-actions {
           width: 100%;
           justify-content: stretch;
+
+          button {
+            flex: 1;
+          }
+        }
+      }
+    }
+
+    @media (max-width: 576px) {
+      .actions {
+        flex-direction: column;
+        width: 100%;
+
+        .primary-actions,
+        .secondary-actions {
+          width: 100%;
 
           button {
             flex: 1;
@@ -366,7 +463,7 @@ export default {
 
           .started-at {
             white-space: nowrap;
-            color: var(--dark);
+            color: var (--dark);
             opacity: 0.7;
             font-size: 0.9rem;
           }
@@ -397,14 +494,11 @@ export default {
         font-size: 1.5rem;
         display: flex;
         align-items: center;
-        gap: 0.5rem;
+        gap: 0.75rem;
 
-        &::before {
-          content: '';
-          width: 4px;
-          height: 24px;
-          background: var(--primary);
-          border-radius: 2px;
+        svg {
+          color: var(--primary);
+          font-size: 0.9em;
         }
       }
 
@@ -535,6 +629,95 @@ export default {
         }
       }
     }
+  }
+
+  .skeleton-loader {
+    .skeleton {
+      background: #eee;
+      border-radius: 8px;
+      animation: loading 1.5s infinite;
+
+      &.header {
+        height: 60px;
+        margin-bottom: 2rem;
+      }
+
+      &.stats {
+        height: 100px;
+        margin-bottom: 2rem;
+      }
+
+      &.buckets {
+        height: 400px;
+      }
+    }
+  }
+
+  .header-main {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+
+    .help-button {
+      background: none;
+      color: var(--primary);
+      padding: 0.5rem;
+      font-size: 0.9rem;
+
+      &:hover {
+        color: var(--special);
+      }
+    }
+  }
+
+  .help-popover {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+
+    .help-content {
+      background: white;
+      padding: 2rem;
+      border-radius: 8px;
+      max-width: 400px;
+
+      h3 {
+        color: var(--primary);
+        margin-bottom: 1rem;
+      }
+
+      ul {
+        margin-bottom: 1.5rem;
+        padding-left: 1.5rem;
+
+        li {
+          margin-bottom: 0.5rem;
+        }
+      }
+    }
+  }
+
+  .section-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1.5rem;
+  }
+}
+
+@keyframes loading {
+  0% {
+    opacity: 0.6;
+  }
+  50% {
+    opacity: 0.8;
+  }
+  100% {
+    opacity: 0.6;
   }
 }
 

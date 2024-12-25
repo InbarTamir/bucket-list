@@ -1,10 +1,14 @@
 <template>
   <div
     class="bucket"
-    :class="{
-      'has-activity': bucket.notesMap.inProgress.length > 0,
-      'is-complete': isDone
-    }"
+    :class="[
+      bucketClass,
+      {
+        'has-activity': bucket.notesMap.inProgress.length > 0,
+        'is-complete': isDone,
+        'is-empty': !hasNotes
+      }
+    ]"
   >
     <div class="bucket-header">
       <div class="title-area">
@@ -96,6 +100,18 @@ export default {
     getProgressPercent() {
       const total = this.bucket.stats.pending + this.bucket.stats.inProgress + this.bucket.stats.completed
       return total ? (this.bucket.stats.completed / total) * 100 : 0
+    },
+    bucketClass() {
+      if (!this.bucket.labeled) return 'time-bucket'
+      return `label-bucket color-${this.colorIndex}`
+    },
+    colorIndex() {
+      // Generate consistent color index based on bucket title
+      return Math.abs(
+        this.bucket.title.split('').reduce((acc, char) => {
+          return acc + char.charCodeAt(0)
+        }, 0) % 5
+      )
     }
   },
   methods: {
@@ -247,6 +263,38 @@ export default {
         color: white;
       }
     }
+  }
+
+  &.label-bucket {
+    &.color-0 {
+      border-left: 4px solid #4caf50;
+    }
+    &.color-1 {
+      border-left: 4px solid #2196f3;
+    }
+    &.color-2 {
+      border-left: 4px solid #9c27b0;
+    }
+    &.color-3 {
+      border-left: 4px solid #ff9800;
+    }
+    &.color-4 {
+      border-left: 4px solid #e91e63;
+    }
+  }
+
+  &.time-bucket {
+    border-left: 4px solid var(--primary);
+  }
+
+  &.is-empty {
+    opacity: 0.7;
+  }
+
+  .bucket-icon {
+    color: var(--secondary);
+    font-size: 1.1rem;
+    margin-right: 0.5rem;
   }
 }
 </style>
