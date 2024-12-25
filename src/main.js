@@ -28,7 +28,10 @@ const toastOptions = {
   hideProgressBar: true,
   closeButton: 'button',
   icon: true,
-  rtl: false
+  rtl: false,
+  transition: 'Vue-Toastification__bounce',
+  maxToasts: 3,
+  newestOnTop: true
 }
 
 // Use toast plugin

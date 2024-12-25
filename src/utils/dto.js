@@ -1,4 +1,4 @@
-import { TIME_BUCKETS } from '../utils/constants'
+import { CURRENT_DATA_VERSION } from './migrations'
 
 /* ============================== */
 /*            STC DTOs            */
@@ -21,6 +21,15 @@ class SchemaBasedDTO {
 
   static clientToServer(data) {
     return new this(data, { origin: 'client', target: 'server' })
+  }
+}
+
+export class ServerData {
+  constructor(data = {}) {
+    this.version = data.version || CURRENT_DATA_VERSION
+    this.notes = data.notes || []
+    this.activity_records = data.activityRecords || []
+    this.labeled_buckets = data.labeledBuckets || [{ id: 1, title: 'Important', createdAt: new Date().toISOString() }]
   }
 }
 

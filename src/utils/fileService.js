@@ -1,9 +1,3 @@
-import Vue from 'vue'
-
-async function showError(message) {
-  Vue.$toast.error(message)
-}
-
 export async function downloadBackup(data) {
   const json = JSON.stringify(data, null, 2)
   const blob = new Blob([json], { type: 'application/json' })

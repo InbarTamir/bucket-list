@@ -1,19 +1,21 @@
 import { openDB } from 'idb'
 import { migrateData } from './migrations'
+import { CURRENT_DATA_VERSION } from './migrations'
+import { ServerData } from './dto'
 
 const DB_NAME = 'bucket-list-db'
 const STORE_NAME = 'app-data'
 const DB_VERSION = 1
 const MAX_SIZE_MB = 50 // Maximum size in megabytes
 const REQUIRED_FIELDS = ['notes', 'activity_records', 'labeled_buckets']
-export const CURRENT_DATA_VERSION = '1.0'
 
 async function getDB() {
   return openDB(DB_NAME, DB_VERSION, {
     upgrade(db, oldVersion, newVersion) {
       // Only create store if it doesn't exist
       if (!db.objectStoreNames.contains(STORE_NAME)) {
-        db.createObjectStore(STORE_NAME)
+        const store = db.createObjectStore(STORE_NAME)
+        store.put(new ServerData(), 'app-state')
       }
     }
   })
@@ -54,8 +56,8 @@ export async function saveToIndexedDB(data) {
     await db.put(STORE_NAME, versionedData, 'app-state')
     console.log(`Data saved to IndexedDB successfully (${Math.round(size * 100) / 100}MB)`)
   } catch (error) {
-    console.error('Failed to save to IndexedDB:', error)
-    throw new Error('Failed to save data to browser storage')
+    Vue.$toast.error('Failed to save to browser storage: ' + error.message)
+    throw error
   }
 }
 

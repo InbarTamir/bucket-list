@@ -68,11 +68,13 @@ export default new Vuex.Store({
     },
     // TODO:
     addLabeledBucket(state, bucket) {
-      state.labeledBuckets.push({
-        id: Date.now(),
-        title: bucket.title,
-        createdAt: new Date().toISOString()
-      })
+      state.labeledBuckets.push(
+        new LabeledBucket({
+          id: Date.now(),
+          title: bucket.title,
+          createdAt: new Date().toISOString()
+        })
+      )
     },
     updateActivityRecord(state, updatedRecord) {
       const index = state.activityRecords.findIndex(record => record.id === updatedRecord.id)
@@ -88,45 +90,40 @@ export default new Vuex.Store({
     }
   },
   actions: {
-    // Add this helper method
-    _getNormalizedData({ state }) {
-      return {
-        version: CURRENT_DATA_VERSION,
-        notes: state.notes.map(note => Note.clientToServer(note)),
-        activity_records: state.activityRecords.map(record => ActivityRecord.clientToServer(record)),
-        labeled_buckets: state.labeledBuckets.map(bucket => LabeledBucket.clientToServer(bucket))
-      }
-    },
+    _prepareServerData({ state }) {
+      const notes = state.notes.map(note => Note.clientToServer(note))
+      const activityRecords = state.activityRecords.map(record => ActivityRecord.clientToServer(record))
+      const labeledBuckets = state.labeledBuckets.map(bucket => LabeledBucket.clientToServer(bucket))
 
+      return new ServerData({ notes, activityRecords, labeledBuckets })
+    },
     async saveData({ dispatch }) {
-      const data = await dispatch('_getNormalizedData')
+      const data = await dispatch('_prepareServerData')
       await saveToIndexedDB(data)
     },
 
     async loadData({ commit }) {
       try {
-        // Only try loading from IndexedDB
         const data = await loadFromIndexedDB()
 
         if (data) {
           const notes = data.notes.map(note => Note.serverToClient(note))
           commit('setNotes', notes)
-          // Activity Records
+
           const activityRecords = data.activity_records.map(record => ActivityRecord.serverToClient(record))
           commit('setActivityRecords', activityRecords)
-          // Labeled Buckets
+
           const labeledBuckets = data.labeled_buckets.map(bucket => LabeledBucket.serverToClient(bucket))
           commit('setLabeledBuckets', labeledBuckets)
         }
       } catch (error) {
-        console.error('Failed to load data:', error)
+        Vue.$toast.error('Failed to load data: ' + error.message)
       }
     },
 
-    // Add new export/import actions
     async exportToFile({ dispatch }) {
       try {
-        const data = await dispatch('_getNormalizedData')
+        const data = await dispatch('_prepareServerData')
         await downloadBackup(data)
         Vue.$toast.success('Data exported successfully')
       } catch (error) {

@@ -1,27 +1,30 @@
 const migrations = {
-  '1.0': data => data, // Current version - no changes needed
+  '1.0': data => data,
   '0.0': data => {
-    // Convert from unversioned data to version 1.0
     return {
-      version: '1.0', // Add version field
-      notes: data.notes || [], // Ensure arrays exist
+      version: '1.0',
+      notes: data.notes || [],
       activity_records: data.activity_records || [],
       labeled_buckets: data.labeled_buckets || []
     }
   }
 }
 
+export const CURRENT_DATA_VERSION = Object.keys(migrations).sort().at(-1)
+
 export function migrateData(data) {
   if (!data) return null
 
   const currentVersion = data.version || '0.0'
   const versions = Object.keys(migrations).sort()
-  const targetVersion = versions[versions.length - 1]
+  const startIdx = versions.indexOf(currentVersion)
+  let migratedData = data
 
-  if (currentVersion === targetVersion) {
-    return data
+  // Apply migrations sequentially
+  for (let i = startIdx; i < versions.length; i++) {
+    const version = versions[i]
+    migratedData = migrations[version](migratedData)
   }
 
-  console.log(`Migrating data from version ${currentVersion} to ${targetVersion}`)
-  return migrations[targetVersion](data)
+  return migratedData
 }
