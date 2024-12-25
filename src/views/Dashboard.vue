@@ -1,5 +1,10 @@
 <template>
-  <div class="dashboard" role="main">
+  <div class="dashboard" role="main" :class="{ 'is-loading': isLoading }">
+    <!-- Add loading overlay -->
+    <div v-if="isLoading" class="loading-overlay">
+      <font-awesome-icon icon="spinner" spin />
+      <span>Loading...</span>
+    </div>
     <!-- Skip link for keyboard users -->
     <a href="#main-content" class="skip-link">Skip to main content</a>
 
@@ -141,7 +146,8 @@ export default {
       selectedBucket: null,
       showCreateBucketModal: false,
       isExporting: false,
-      isImporting: false
+      isImporting: false,
+      isLoading: false
     }
   },
   computed: {
@@ -428,17 +434,118 @@ export default {
       .getting-started {
         border: 2px dashed var(--primary);
         border-radius: 8px;
+        padding: 2rem;
         margin: -0.5rem -0.5rem 1.5rem;
-        transition: all 0.2s ease;
 
-        &:hover {
-          border-color: var(--special);
-          background: var(--light);
+        .getting-started-content {
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          text-align: center;
+          max-width: 600px;
+          margin: 0 auto;
+
+          .organization-options {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 2rem;
+            width: 100%;
+            margin-bottom: 2rem;
+
+            .option {
+              background: var(--light);
+              padding: 2rem;
+              border-radius: 8px;
+              display: flex;
+              flex-direction: column;
+              align-items: center;
+              gap: 1rem;
+
+              &.active {
+                background: white;
+                border: 2px dashed var(--primary);
+              }
+
+              .feature-icon {
+                font-size: 2rem;
+                color: var(--primary);
+              }
+
+              h3 {
+                font-size: 1.2rem;
+                margin: 0;
+              }
+
+              p {
+                color: var(--dark);
+                opacity: 0.8;
+                margin-bottom: 0.5rem;
+              }
+
+              button {
+                width: 100%;
+              }
+            }
+          }
+
+          .feature-icon {
+            color: var(--primary);
+            font-size: 2.5rem;
+            margin-bottom: 1rem;
+          }
+
+          .steps {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+            margin-bottom: 2rem;
+            width: 100%;
+
+            .step {
+              display: flex;
+              align-items: center;
+              gap: 1rem;
+              text-align: left;
+
+              .step-number {
+                background: var(--primary);
+                color: white;
+                width: 28px;
+                height: 28px;
+                border-radius: 50%;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                font-weight: bold;
+                flex-shrink: 0;
+              }
+
+              .step-text {
+                color: var(--dark);
+                font-size: 1.1rem;
+                line-height: 1.4;
+              }
+            }
+          }
+
+          button {
+            font-size: 1.1rem;
+            padding: 0.8rem 1.5rem;
+          }
         }
-
-        // ...rest of getting-started styles remain the same...
       }
     }
   }
+}
+
+.loading-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(255, 255, 255, 0.8);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+  z-index: 1000;
 }
 </style>
