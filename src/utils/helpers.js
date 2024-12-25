@@ -1,14 +1,14 @@
 import { DATE_FORMAT_OPTIONS } from './constants'
 
 export default {
-  formatDateTime: date => {
-    if (!date) return '-'
-    try {
-      const dateObj = new Date(date)
-      return dateObj.toLocaleString(undefined, DATE_FORMAT_OPTIONS)
-    } catch (e) {
-      console.error('Invalid date:', e)
-      return 'Invalid Date'
-    }
+  formatDateTime(dateStr) {
+    const date = new Date(dateStr)
+    return new Intl.DateTimeFormat('en-US', {
+      month: 'short',
+      day: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit',
+      hour12: true
+    }).format(date)
   }
 }

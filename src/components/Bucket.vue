@@ -1,35 +1,47 @@
 <template>
-  <div class="bucket" :class="{ 'in-progress-shadow': bucket.notesMap.inProgress.length > 0, 'bucket-completed': isDone }">
-    <h2>
-      {{ bucket.title }}
-      <span v-if="timeEstimation" class="time-indicator"> {{ timeEstimation }} <font-awesome-icon icon="clock" /> </span>
-    </h2>
+  <div
+    class="bucket"
+    :class="{
+      'has-activity': bucket.notesMap.inProgress.length > 0,
+      'is-complete': isDone
+    }"
+  >
+    <div class="bucket-header">
+      <div class="title-area">
+        <h2>{{ bucket.title }}</h2>
+        <span v-if="timeEstimation" class="time-badge">{{ timeEstimation }} <font-awesome-icon icon="clock" /></span>
+      </div>
 
-    <div class="stats">
-      <div class="count">
-        <span class="number">{{ bucket.stats.pending }}</span>
-        <span class="label">Pending</span>
+      <div class="actions">
+        <button v-if="showAddButton" class="icon-button" @click="addNote" data-tooltip="Add Note">
+          <font-awesome-icon icon="plus" />
+        </button>
       </div>
-      <div :class="['count', { 'in-progress': bucket.stats.inProgress > 0 }]">
-        <span class="number">{{ bucket.stats.inProgress }}</span>
-        <span class="label">In-Progress</span>
+    </div>
+
+    <div class="bucket-stats">
+      <div class="stat pending" :class="{ 'has-items': bucket.stats.pending > 0 }">
+        <div class="stat-number">{{ bucket.stats.pending }}</div>
+        <div class="stat-label">Pending</div>
       </div>
-      <div class="count completed">
-        <span class="number">{{ bucket.stats.completed }}</span>
-        <span class="label">Completed</span>
+      <div class="stat in-progress" :class="{ 'has-items': bucket.stats.inProgress > 0 }">
+        <div class="stat-number">{{ bucket.stats.inProgress }}</div>
+        <div class="stat-label">Active</div>
+      </div>
+      <div class="stat completed">
+        <div class="stat-number">{{ bucket.stats.completed }}</div>
+        <div class="stat-label">Done</div>
       </div>
     </div>
 
     <div class="bucket-actions">
-      <button v-if="showAddButton" @click="addNote">Add Note</button>
-      <template v-if="pendingNotes.length">
-        <button class="outlined" @click="randomNote"><font-awesome-icon icon="dice" /> Random</button>
-        <button class="outlined" @click="pickNote"><font-awesome-icon icon="hand-pointer" /> Pick</button>
-      </template>
+      <button v-if="pendingNotes.length" class="pick-button" @click="pickNote"><font-awesome-icon icon="hand-pointer" /> Select Note</button>
+      <button v-if="pendingNotes.length" class="random-button" @click="randomNote" data-tooltip="Pick random note">
+        <font-awesome-icon icon="dice" />
+      </button>
     </div>
 
     <random-note-modal :show="showRandomModal" :bucket="bucket" :notes="pendingNotes" @close="closeRandomModal" @start="startNote" @delete="deleteNote" />
-
     <pick-note-modal :show="showPickModal" :bucket="bucket" :notes="pendingNotes" @close="closePickModal" @start="startNote" @delete="deleteNote" />
   </div>
 </template>
@@ -73,6 +85,17 @@ export default {
       if (!this.bucket.max) return null
       if (this.bucket.max === Infinity) return `∞`
       return `${this.bucket.max}m`
+    },
+    hasNotes() {
+      return this.bucket.notes.length > 0
+    },
+    getPendingPercent() {
+      const total = this.bucket.stats.pending + this.bucket.stats.inProgress + this.bucket.stats.completed
+      return total ? (this.bucket.stats.pending / total) * 100 : 0
+    },
+    getProgressPercent() {
+      const total = this.bucket.stats.pending + this.bucket.stats.inProgress + this.bucket.stats.completed
+      return total ? (this.bucket.stats.completed / total) * 100 : 0
     }
   },
   methods: {
@@ -103,104 +126,127 @@ export default {
 
 <style lang="scss" scoped>
 .bucket {
-  width: fit-content;
   background: white;
-  border-radius: 8px;
-  padding: 20px;
-  margin: 10px;
-  box-shadow: 0 2px 4px var(--shadow);
-  transition: all 0.3s ease;
+  border-radius: 12px;
+  padding: 1.5rem;
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  height: 100%;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.03), 0 0 0 1px rgba(0, 0, 0, 0.05);
 
-  &:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 4px 8px var(--shadow);
+  &.is-complete {
+    opacity: 0.4;
   }
 
-  &.bucket-completed {
-    opacity: 0.4;
+  .bucket-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1.5rem;
 
-    &:hover {
-      opacity: 1; // Restore full opacity on hover
+    .title-area {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+
+      h2 {
+        font-size: 1.2rem;
+        color: var(--dark);
+        font-weight: 600;
+      }
+
+      .time-badge {
+        color: var(--primary);
+        font-size: 0.9rem;
+        font-weight: 500;
+        display: flex;
+        align-items: center;
+        gap: 0.25rem;
+      }
     }
   }
 
-  h2 {
-    color: var(--primary);
-    margin-bottom: 15px;
-    font-size: 1.5rem;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 4px;
+  .bucket-stats {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 0.75rem; // Increased gap between stats
+    margin: 1.25rem 0; // Increased vertical margin
 
-    .time-indicator {
-      font-size: 0.5em;
-      color: var(--special-dark);
-      padding: 2px 6px;
-      border-radius: 4px;
-      font-weight: normal;
+    .stat {
+      text-align: center;
+      padding: 1.25rem 1rem;
+      border-radius: 8px;
+      border: 1px solid rgba(0, 0, 0, 0.05);
 
-      i {
-        font-size: 0.9em;
-        margin-left: 2px;
+      .stat-number {
+        font-size: 2rem;
+        font-weight: 700;
+        line-height: 1;
+      }
+
+      .stat-label {
+        font-size: 0.8rem;
+        margin-top: 0.25rem;
+      }
+
+      &.pending {
+        color: var(--dark);
+
+        &.has-items {
+          background: rgba(56, 172, 247, 0.1);
+          .stat-number {
+            color: var(--primary);
+          }
+        }
+      }
+
+      &.in-progress {
+        color: var(--active-number);
+
+        &.has-items {
+          background: rgba(255, 132, 28, 0.15);
+        }
+      }
+
+      &.completed {
+        color: var(--success);
       }
     }
   }
 
   .bucket-actions {
+    margin-top: auto; // Push actions to bottom
+    padding-top: 1rem; // Add some space from stats
+    border-top: 1px solid rgba(0, 0, 0, 0.05);
+
     display: flex;
-    gap: 0.8rem;
-    justify-content: flex-end;
-  }
+    gap: 0.5rem;
 
-  .stats {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 1rem;
-    margin-bottom: 1.5rem;
-    padding: 1rem;
-    background: var(--light);
-    border-radius: 6px;
-
-    .count {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
+    .pick-button {
+      flex: 1;
+      background: var(--light);
+      color: var(--dark);
       padding: 0.5rem;
+      font-size: 0.9rem;
+      border-radius: 6px;
 
-      .number {
-        font-size: 1.8rem;
-        font-weight: bold;
-        color: var(--primary);
-      }
-
-      .label {
-        font-size: 0.8rem;
-        color: var(--dark);
-        opacity: 0.8;
-        white-space: nowrap;
-      }
-
-      &.in-progress .number {
-        color: var(--active-number);
-        animation: bounce 0.8s ease-in-out infinite; // Slightly faster animation
-        font-weight: 900;
-      }
-
-      &.completed .number {
-        color: var(--success);
+      &:hover {
+        background: var(--primary);
+        color: white;
       }
     }
-  }
-}
 
-@keyframes bounce {
-  0%,
-  100% {
-    transform: scale(1);
-  }
-  50% {
-    transform: scale(1.2); // Slightly bigger bounce
+    .random-button {
+      background: rgba(230, 128, 255, 0.1);
+      color: var(--special-dark);
+      width: 40px;
+      padding: 0.5rem;
+      border-radius: 6px;
+
+      &:hover {
+        background: var(--special);
+        color: white;
+      }
+    }
   }
 }
 </style>

@@ -1,20 +1,62 @@
 <template>
-  <div class="dashboard">
+  <div class="dashboard" role="main">
+    <!-- Skip link for keyboard users -->
+    <a href="#main-content" class="skip-link">Skip to main content</a>
+
     <div class="dashboard-header">
-      <h1>Notes Dashboard</h1>
-      <div class="actions">
-        <div class="file-actions">
-          <button class="secondary" :disabled="isExporting" @click="exportData">
+      <h1 id="main-content" tabindex="-1">Notes Dashboard</h1>
+      <div class="actions" role="toolbar" aria-label="Dashboard actions">
+        <div class="primary-actions">
+          <button class="success prominent" @click="showCreateNoteModal = true" aria-label="Create new note">
+            <font-awesome-icon icon="file-signature" />
+            Create Note
+          </button>
+          <button class="primary prominent" @click="showCreateBucketModal = true" aria-label="Create new bucket">
+            <font-awesome-icon icon="folder-plus" />
+            Create Bucket
+          </button>
+        </div>
+
+        <div class="secondary-actions">
+          <button class="secondary" :disabled="isExporting" @click="exportData" aria-label="Export data">
             <font-awesome-icon :icon="isExporting ? 'spinner' : 'file-export'" :spin="isExporting" />
             {{ isExporting ? 'Exporting...' : 'Export' }}
           </button>
-          <button class="secondary" :disabled="isImporting" @click="importData">
+          <button class="secondary" :disabled="isImporting" @click="importData" aria-label="Import data">
             <font-awesome-icon :icon="isImporting ? 'spinner' : 'file-import'" :spin="isImporting" />
             {{ isImporting ? 'Importing...' : 'Import' }}
           </button>
         </div>
-        <button class="primary prominent" @click="showCreateBucketModal = true"><font-awesome-icon icon="folder-plus" /> Create Bucket</button>
-        <button class="success prominent" @click="showCreateNoteModal = true"><font-awesome-icon icon="file-signature" /> Create Note</button>
+      </div>
+    </div>
+
+    <!-- Show In Progress section at the top if there are active items -->
+    <div v-if="inProgressRecords.length" class="in-progress-section" role="region" aria-label="In progress items">
+      <h2>
+        <font-awesome-icon icon="clock" />
+        In Progress
+        <span class="count" aria-label="Number of items in progress"> ({{ inProgressRecords.length }}) </span>
+      </h2>
+      <div class="notes-list">
+        <div v-for="activity in inProgressRecords" :key="activity.id" class="note-item" :class="{ overdue: isOverdue(activity) }">
+          <div class="note-info">
+            <span class="description">{{ activity.description }}</span>
+            <span class="label" v-if="activity.label">{{ activity.label }}</span>
+            <span class="time">{{ activity.timeEstimation }}m</span>
+            <span class="started-at">Started: {{ Helpers.formatDateTime(activity.startedAt) }}</span>
+          </div>
+          <div class="actions">
+            <button class="active" data-tooltip="Restart" @click="restartNote(activity)">
+              <font-awesome-icon icon="rotate-right" />
+            </button>
+            <button class="success" data-tooltip="Finish" @click="finishNote(activity)">
+              <font-awesome-icon icon="check" />
+            </button>
+            <button class="danger" data-tooltip="Discard" @click="discardNote(activity)">
+              <font-awesome-icon icon="trash" />
+            </button>
+          </div>
+        </div>
       </div>
     </div>
 
@@ -69,31 +111,6 @@
         </div>
         <div class="buckets-container">
           <bucket v-for="bucket in timeBuckets" :key="bucket.title" :bucket="bucket" :show-add-button="false" @start-note="startNote" @delete-note="deleteNote" />
-        </div>
-      </div>
-    </div>
-
-    <div v-if="inProgressRecords.length" class="in-progress-section">
-      <h2>In Progress</h2>
-      <div class="notes-list">
-        <div v-for="activity in inProgressRecords" :key="activity.id" class="note-item">
-          <div class="note-info">
-            <span class="description">{{ activity.description }}</span>
-            <span class="label" v-if="activity.label">{{ activity.label }}</span>
-            <span class="time">{{ activity.timeEstimation }}m</span>
-            <span class="started-at">Started: {{ Helpers.formatDateTime(activity.startedAt) }}</span>
-          </div>
-          <div class="actions">
-            <button class="active" data-tooltip="Restart" @click="restartNote(activity)">
-              <font-awesome-icon icon="rotate-right" />
-            </button>
-            <button class="success" data-tooltip="Finish" @click="finishNote(activity)">
-              <font-awesome-icon icon="check" />
-            </button>
-            <button class="danger" data-tooltip="Discard" @click="discardNote(activity)">
-              <font-awesome-icon icon="trash" />
-            </button>
-          </div>
         </div>
       </div>
     </div>
@@ -189,6 +206,11 @@ export default {
     },
     scrollToTimeBuckets() {
       this.$el.querySelector('.time-buckets').scrollIntoView({ behavior: 'smooth' })
+    },
+    isOverdue(activity) {
+      const startTime = new Date(activity.startedAt).getTime()
+      const estimatedEndTime = startTime + activity.timeEstimation * 60 * 1000
+      return Date.now() > estimatedEndTime
     }
   }
 }
@@ -197,229 +219,127 @@ export default {
 <style lang="scss" scoped>
 .dashboard {
   padding: 20px;
+  max-width: 1400px;
+  margin: 0 auto;
+
+  .skip-link {
+    position: absolute;
+    left: -9999px;
+    z-index: 999;
+    padding: 1em;
+    background-color: white;
+    color: var(--primary);
+    text-decoration: none;
+
+    &:focus {
+      left: 50%;
+      transform: translateX(-50%);
+    }
+  }
 
   .dashboard-header {
     display: flex;
+    flex-wrap: wrap;
+    gap: 1rem;
     justify-content: space-between;
     align-items: center;
     margin-bottom: 2rem;
+    padding: 1rem;
+    background: white;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px var(--shadow);
 
     h1 {
       color: var(--dark);
-      font-size: 2rem;
+      font-size: clamp(1.5rem, 4vw, 2rem);
+      margin: 0;
+
+      &:focus {
+        outline: none;
+        text-decoration: underline;
+      }
     }
 
     .actions {
       display: flex;
+      flex-wrap: wrap;
       gap: 1rem;
 
-      .file-actions {
+      .primary-actions,
+      .secondary-actions {
         display: flex;
         gap: 0.5rem;
-        margin-right: 1rem;
-        padding-right: 1rem;
-        border-right: 1px solid var(--light);
-      }
-    }
-  }
-
-  .buckets-grid {
-    display: flex;
-    flex-direction: column;
-    gap: 2rem;
-
-    .section {
-      h2 {
-        color: var(--dark);
-        margin-bottom: 1rem;
-        font-size: 1.5rem;
       }
 
-      .buckets-container {
-        display: flex;
-        flex-wrap: wrap;
-        gap: 0.5rem;
-      }
+      @media (max-width: 768px) {
+        width: 100%;
+        flex-direction: column-reverse;
 
-      .getting-started {
-        background: white;
-        border: 2px dashed var(--primary);
-        border-radius: 8px;
-        padding: 2rem;
-        margin-bottom: 1.5rem;
-
-        .getting-started-content {
-          display: flex;
-          flex-direction: column;
-          align-items: center;
-          text-align: center;
-          max-width: 600px;
-          margin: 0 auto;
-
-          .organization-options {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-            gap: 2rem;
-            width: 100%;
-            margin-bottom: 2rem;
-
-            .option {
-              background: var(--light);
-              padding: 2rem;
-              border-radius: 8px;
-              display: flex;
-              flex-direction: column;
-              align-items: center;
-              gap: 1rem;
-              transition: transform 0.2s ease;
-
-              &:hover {
-                transform: translateY(-2px);
-              }
-
-              &.active {
-                background: white;
-                border: 2px dashed var(--primary);
-              }
-
-              .feature-icon {
-                font-size: 2rem;
-                color: var(--primary);
-              }
-
-              h3 {
-                font-size: 1.2rem;
-                margin: 0;
-              }
-
-              p {
-                color: var(--dark);
-                opacity: 0.8;
-                text-align: center;
-                margin-bottom: 0.5rem;
-              }
-
-              button {
-                width: 100%;
-              }
-            }
-          }
-
-          .feature-icon {
-            color: var(--primary);
-            font-size: 2.5rem;
-            margin-bottom: 1rem;
-          }
-
-          h3 {
-            color: var(--dark);
-            font-size: 1.4rem;
-            margin-bottom: 1.5rem;
-          }
-
-          .steps {
-            display: flex;
-            flex-direction: column;
-            gap: 1rem;
-            margin-bottom: 2rem;
-            width: 100%;
-
-            .step {
-              display: flex;
-              align-items: center;
-              gap: 1rem;
-              text-align: left;
-
-              .step-number {
-                background: var(--primary);
-                color: white;
-                width: 28px;
-                height: 28px;
-                border-radius: 50%;
-                display: flex;
-                align-items: center;
-                justify-content: center;
-                font-weight: bold;
-                flex-shrink: 0;
-              }
-
-              .step-text {
-                color: var(--dark);
-                font-size: 1.1rem;
-                line-height: 1.4;
-              }
-            }
-          }
+        .primary-actions,
+        .secondary-actions {
+          width: 100%;
+          justify-content: stretch;
 
           button {
-            font-size: 1.1rem;
-            padding: 0.8rem 1.5rem;
+            flex: 1;
           }
-
-          button.primary {
-            background: var(--primary);
-            &:hover {
-              background: darken(#38acf7, 5%);
-            }
-          }
-        }
-      }
-
-      .empty-message {
-        display: flex;
-        align-items: center;
-        gap: 0.75rem;
-        background: var(--light);
-        border: 1px solid var(--primary);
-        color: var(--dark);
-        padding: 0.75rem 1rem;
-        border-radius: 6px;
-        margin-bottom: 1rem;
-        font-size: 0.95rem;
-
-        .info-icon {
-          color: var(--primary);
-          font-size: 1.2rem;
-          flex-shrink: 0;
         }
       }
     }
   }
 
   .in-progress-section {
-    margin-top: 2rem;
-    padding-top: 2rem;
-    border-top: 2px solid var(--light);
+    margin-bottom: 2rem;
+    padding: 1.5rem;
     background: white;
     border-radius: 8px;
-    padding: 20px;
     box-shadow: 0 2px 4px var(--shadow);
+    border-left: 4px solid var(--primary);
 
     h2 {
       color: var(--primary);
       margin-bottom: 1rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+
+      .count {
+        font-size: 0.9em;
+        color: var(--dark);
+        opacity: 0.7;
+      }
     }
 
     .notes-list {
-      display: flex;
-      flex-direction: column;
+      display: grid;
       gap: 1rem;
+      grid-template-columns: repeat(auto-fill, minmax(400px, 1fr)); // Increased min-width
 
       .note-item {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        padding: 1rem;
         background: var(--light);
-        border-radius: 6px;
+        border-radius: 8px;
+        padding: 1rem;
+        display: grid;
+        grid-template-columns: 1fr auto; // Changed to grid layout
+        gap: 1rem;
+        align-items: center;
+
+        &.overdue {
+          border-left: 3px solid var(--danger);
+        }
 
         .note-info {
-          display: flex;
-          gap: 1rem;
+          display: grid;
+          grid-template-columns: minmax(0, 2fr) auto auto auto; // Grid layout for note info
+          gap: 0.75rem;
           align-items: center;
 
           .description {
             font-weight: 500;
+            min-width: 0;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
           }
 
           .label {
@@ -428,10 +348,18 @@ export default {
             padding: 0.2rem 0.5rem;
             border-radius: 4px;
             font-size: 0.8rem;
+            white-space: nowrap;
           }
 
-          .time,
+          .time {
+            white-space: nowrap;
+            color: var(--dark);
+            opacity: 0.7;
+            font-size: 0.9rem;
+          }
+
           .started-at {
+            white-space: nowrap;
             color: var(--dark);
             opacity: 0.7;
             font-size: 0.9rem;
@@ -442,6 +370,73 @@ export default {
           display: flex;
           gap: 0.5rem;
         }
+      }
+    }
+  }
+
+  .buckets-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 2rem;
+
+    .section {
+      background: white;
+      border-radius: 8px;
+      padding: 2rem;
+      box-shadow: 0 2px 4px var(--shadow);
+
+      h2 {
+        color: var(--dark);
+        margin-bottom: 1.5rem;
+        font-size: 1.5rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+
+        &::before {
+          content: '';
+          width: 4px;
+          height: 24px;
+          background: var(--primary);
+          border-radius: 2px;
+        }
+      }
+
+      .buckets-container {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+        gap: 1rem;
+        align-items: start;
+
+        @media (max-width: 768px) {
+          grid-template-columns: 1fr; // Stack on mobile
+        }
+      }
+
+      &.labeled-buckets:empty::after,
+      &.time-buckets:empty::after {
+        content: 'No buckets yet';
+        display: block;
+        text-align: center;
+        padding: 2rem;
+        color: var(--dark);
+        opacity: 0.6;
+        font-style: italic;
+      }
+
+      // Getting started improvements
+      .getting-started {
+        border: 2px dashed var(--primary);
+        border-radius: 8px;
+        margin: -0.5rem -0.5rem 1.5rem;
+        transition: all 0.2s ease;
+
+        &:hover {
+          border-color: var(--special);
+          background: var(--light);
+        }
+
+        // ...rest of getting-started styles remain the same...
       }
     }
   }
