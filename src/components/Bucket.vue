@@ -86,10 +86,7 @@ export default {
       this.showPickModal = true
     },
     startNote(note) {
-      this.$emit('start-note', {
-        ...note,
-        label: this.bucket.title
-      })
+      this.$emit('start-note', note)
     },
     closeRandomModal() {
       this.showRandomModal = false

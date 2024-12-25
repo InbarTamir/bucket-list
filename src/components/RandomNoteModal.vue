@@ -73,8 +73,9 @@ export default {
   methods: {
     pickRandomNote() {
       if (this.notes.length > 0) {
-        const randomIndex = Math.floor(Math.random() * this.notes.length)
-        this.currentNote = this.notes[randomIndex]
+        const tempNotes = this.notes.filter(note => note.id !== this.currentNote?.id)
+        const randomIndex = Math.floor(Math.random() * tempNotes.length)
+        this.currentNote = tempNotes[randomIndex]
       } else {
         this.currentNote = null
       }
@@ -97,9 +98,10 @@ export default {
 <style lang="scss" scoped>
 .modal-content {
   padding: 2rem;
-  min-width: 400px;
-  max-width: 800px;
+  min-width: 600px;
+  max-width: 1000px;
   margin-inline: auto;
+  width: 80%;
 
   .modal-header {
     margin-bottom: 2rem;
