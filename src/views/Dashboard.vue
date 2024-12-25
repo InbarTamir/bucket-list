@@ -22,14 +22,14 @@
       <div class="section labeled-buckets">
         <h2>Labeled Buckets</h2>
         <div class="buckets-container">
-          <bucket v-for="bucket in labeledBuckets" :key="bucket.id" :bucket="bucket" @add-note="openCreateNoteModal" @start-note="startNote" />
+          <bucket v-for="bucket in labeledBuckets" :key="bucket.id" :bucket="bucket" @add-note="openCreateNoteModal" @start-note="startNote" @delete-note="deleteNote" />
         </div>
       </div>
 
       <div class="section time-buckets">
         <h2>Time-Based Buckets</h2>
         <div class="buckets-container">
-          <bucket v-for="bucket in timeBuckets" :key="bucket.title" :bucket="bucket" :show-add-button="false" @start-note="startNote" />
+          <bucket v-for="bucket in timeBuckets" :key="bucket.title" :bucket="bucket" :show-add-button="false" @start-note="startNote" @delete-note="deleteNote" />
         </div>
       </div>
     </div>

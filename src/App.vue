@@ -134,6 +134,13 @@ button {
     background: var(--success);
   }
 
+  &.play {
+    background: var(--success);
+    &:hover {
+      background: darken(#28a745, 5%);
+    }
+  }
+
   &.active {
     background: var(--active-number);
   }
@@ -150,6 +157,21 @@ button {
     &:hover {
       transform: translateY(-2px);
       box-shadow: 0 4px 8px var(--shadow);
+    }
+  }
+
+  &.close-button {
+    background: transparent;
+    color: var(--dark);
+    opacity: 0.5;
+    padding: 0;
+    margin-inline-start: 20px;
+    margin-block-end: 40px;
+    transition: opacity 0.2s;
+
+    &:hover {
+      opacity: 1;
+      transform: none;
     }
   }
 }
@@ -169,7 +191,20 @@ select {
   }
 }
 
-// Add dialog styles
+.modal-header {
+  margin-bottom: 2rem;
+  position: relative;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+
+  h3 {
+    font-size: 1.6rem;
+    color: var(--primary);
+    margin-bottom: 1rem;
+  }
+}
+
 dialog {
   padding: 0;
   border: none;
@@ -177,9 +212,11 @@ dialog {
   box-shadow: 0 4px 12px var(--shadow);
   max-width: 90vw;
   max-height: 90vh;
+  margin-inline: auto;
+  top: 100px;
 
   &::backdrop {
-    background: rgba(0, 0, 0, 0.5);
+    background: rgba(0, 0, 0, 0.6);
   }
 
   &[open] {

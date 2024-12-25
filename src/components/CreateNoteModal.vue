@@ -97,6 +97,7 @@ export default {
     padding: 2rem;
     border-radius: 8px;
     min-width: 300px;
+    margin-inline: auto;
 
     .form-group {
       margin-bottom: 1rem;

@@ -2,10 +2,15 @@
   <dialog ref="dialog">
     <div class="modal-content">
       <div class="modal-header">
-        <h3>Pick Note from {{ bucket.title }}</h3>
-        <div class="search-box">
-          <input type="text" v-model="searchQuery" placeholder="Search notes..." autofocus />
+        <div>
+          <h3>Pick Note from {{ bucket.title }}</h3>
+          <div class="search-box">
+            <input type="text" v-model="searchQuery" placeholder="Search notes..." autofocus />
+          </div>
         </div>
+        <button class="close-button" @click="$emit('close')" data-tooltip="Close">
+          <font-awesome-icon icon="times" />
+        </button>
       </div>
 
       <div class="notes-list">
@@ -21,8 +26,10 @@
             <tr v-for="note in filteredNotes" :key="note.id">
               <td>{{ note.description }}</td>
               <td>{{ note.timeEstimation }}m</td>
-              <td>
-                <button @click="startNote(note)" :disabled="note.status === 'in-progress'">Start</button>
+              <td class="actions">
+                <button class="play" @click="startNote(note)" :disabled="note.status === 'in-progress'" data-tooltip="Start">
+                  <font-awesome-icon icon="play" />
+                </button>
                 <button class="danger" data-tooltip="Delete" @click="deleteNote(note)">
                   <font-awesome-icon icon="trash" />
                 </button>
@@ -31,10 +38,6 @@
           </tbody>
         </table>
         <div v-else class="empty-state">No notes found</div>
-      </div>
-
-      <div class="modal-actions">
-        <button class="danger" @click="$emit('close')">Close</button>
       </div>
     </div>
   </dialog>
@@ -94,9 +97,9 @@ export default {
 <style lang="scss" scoped>
 .modal-content {
   padding: 2rem;
+  margin-inline: auto;
   min-width: 600px;
   max-width: 1000px;
-
   background: white;
   padding: 20px;
   border-radius: 8px;
@@ -105,19 +108,7 @@ export default {
   overflow-y: auto;
 }
 
-.modal-header {
-  margin-bottom: 2rem;
-
-  h3 {
-    font-size: 1.6rem;
-    color: var(--primary);
-    margin-bottom: 1rem;
-  }
-}
-
 .search-box {
-  margin-bottom: 1.5rem;
-
   input {
     width: 100%;
     padding: 0.8rem;
@@ -146,6 +137,16 @@ export default {
     td {
       padding: 1rem;
       border-bottom: 1px solid var(--light);
+
+      &.actions {
+        display: flex;
+        gap: 0.5rem;
+        justify-content: center;
+
+        button {
+          padding-inline: 0.8rem;
+        }
+      }
     }
   }
 }

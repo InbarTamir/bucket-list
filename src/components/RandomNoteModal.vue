@@ -2,21 +2,27 @@
   <dialog ref="dialog">
     <div class="modal-content">
       <div class="modal-header">
-        <h3>Random Note from {{ bucket.title }}</h3>
+        <h3>Random Note from "{{ bucket.title }}"</h3>
+        <button class="close-button" @click="$emit('close')" data-tooltip="Close">
+          <font-awesome-icon icon="times" />
+        </button>
       </div>
 
       <div v-if="currentNote" class="note-content">
         <div class="note-info">
-          <p class="description">{{ currentNote.description }}</p>
-          <span class="time-badge">{{ currentNote.timeEstimation }}m</span>
+          <div class="note-details">
+            <span class="time-badge">{{ currentNote.timeEstimation }}m <font-awesome-icon icon="clock" /></span>
+            <p class="description">{{ currentNote.description }}</p>
+          </div>
+          <div class="actions">
+            <button class="play" @click="startNote" data-tooltip="Start"><font-awesome-icon icon="play" /></button>
+            <button class="danger" data-tooltip="Delete" @click="deleteNote">
+              <font-awesome-icon icon="trash" />
+            </button>
+          </div>
         </div>
-        <div class="actions">
-          <button @click="startNote">Start</button>
-          <button v-if="notes.length > 1" class="secondary" @click="nextNote">Next Random</button>
-          <button class="danger" data-tooltip="Delete" @click="deleteNote">
-            <font-awesome-icon icon="trash" />
-          </button>
-          <button class="secondary" @click="$emit('close')">Close</button>
+        <div class="modal-actions">
+          <button v-if="notes.length > 1" class="secondary" @click="nextNote"><font-awesome-icon icon="dice" /> Next Random</button>
         </div>
       </div>
 
@@ -93,9 +99,11 @@ export default {
   padding: 2rem;
   min-width: 400px;
   max-width: 800px;
+  margin-inline: auto;
 
   .modal-header {
     margin-bottom: 2rem;
+    position: relative;
 
     h3 {
       color: var(--primary);
@@ -109,32 +117,52 @@ export default {
       padding: 2rem;
       border-radius: 8px;
       margin: 1.5rem 0;
-      position: relative;
+      display: flex;
+      justify-content: flex-start;
+      align-items: center;
+      gap: 1rem;
 
-      .description {
-        font-size: 1.4rem;
-        color: var(--dark);
-        margin-right: 80px;
-        line-height: 1.4;
+      .note-details {
+        flex: 1;
+        display: flex;
+        gap: 1rem;
+        align-items: center;
+        position: relative;
+
+        .description {
+          font-size: 1.4rem;
+          color: var(--dark);
+          line-height: 1.4;
+        }
+
+        .time-badge {
+          position: relative;
+          top: 0;
+          right: 0;
+          background: var(--primary);
+          color: white;
+          padding: 0.2rem 0.6rem;
+          border-radius: 20px;
+          font-size: 1rem;
+          font-weight: 500;
+        }
       }
 
-      .time-badge {
-        position: absolute;
-        top: 1.5rem;
-        right: 1.5rem;
-        background: var(--primary);
-        color: white;
-        padding: 0.5rem 1rem;
-        border-radius: 20px;
-        font-size: 1rem;
-        font-weight: 500;
+      .actions {
+        display: flex;
+        gap: 0.5rem;
+
+        button {
+          padding-inline: 0.8rem;
+        }
       }
     }
 
-    .actions {
+    .modal-actions {
       display: flex;
       gap: 1rem;
       justify-content: flex-end;
+      margin-top: 1rem;
     }
   }
 

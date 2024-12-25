@@ -1,11 +1,5 @@
 <template>
-  <div
-    class="bucket"
-    :class="{
-      'in-progress-shadow': bucket.notesMap.inProgress.length > 0,
-      'bucket-completed': isDone
-    }"
-  >
+  <div class="bucket" :class="{ 'in-progress-shadow': bucket.notesMap.inProgress.length > 0, 'bucket-completed': isDone }">
     <h2>
       {{ bucket.title }}
       <span v-if="timeEstimation" class="time-indicator"> {{ timeEstimation }} <font-awesome-icon icon="clock" /> </span>

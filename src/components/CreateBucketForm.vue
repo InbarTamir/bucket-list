@@ -50,14 +50,7 @@ export default {
     border-radius: 8px;
     padding: 2rem;
     min-width: 400px;
-
-    .modal-header {
-      margin-bottom: 2rem;
-      h3 {
-        color: var(--primary);
-        font-size: 1.4rem;
-      }
-    }
+    margin-inline: auto;
 
     form {
       display: flex;
