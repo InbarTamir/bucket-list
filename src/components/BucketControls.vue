@@ -1,11 +1,11 @@
 <template>
   <div class="bucket-controls">
-    <div class="sort-controls">
+    <div class="sort-controls" ref="controlsContainer">
       <button class="icon-button" @click="toggleControls" data-tooltip="Sort & Filter">
         <font-awesome-icon icon="filter" />
       </button>
 
-      <div v-if="showControls" class="controls-panel">
+      <div v-if="showControls" class="controls-panel" ref="panel" @keydown.esc="closeControls">
         <div class="sort-section">
           <h4>Sort by</h4>
           <select v-model="sortValue" @change="updateSort">
@@ -57,6 +57,14 @@ export default {
       }
     }
   },
+  mounted() {
+    document.addEventListener('click', this.handleClickOutside)
+    document.addEventListener('keydown', this.handleEscape)
+  },
+  beforeDestroy() {
+    document.removeEventListener('click', this.handleClickOutside)
+    document.removeEventListener('keydown', this.handleEscape)
+  },
   methods: {
     toggleControls() {
       this.showControls = !this.showControls
@@ -66,6 +74,20 @@ export default {
     },
     updateFilters() {
       this.$emit('filter', { ...this.filters })
+    },
+    closeControls() {
+      this.showControls = false
+    },
+    handleClickOutside(event) {
+      const container = this.$refs.controlsContainer
+      if (container && !container.contains(event.target)) {
+        this.closeControls()
+      }
+    },
+    handleEscape(event) {
+      if (event.key === 'Escape' && this.showControls) {
+        this.closeControls()
+      }
     }
   }
 }
@@ -86,6 +108,7 @@ export default {
     box-shadow: 0 4px 12px var(--shadow);
     min-width: 200px;
     z-index: 10;
+    outline: none; // Remove focus outline since we're handling keyboard interaction
 
     h4 {
       color: var(--dark);
