@@ -10,6 +10,7 @@
           <h4>Sort by</h4>
           <select v-model="sortValue" @change="updateSort">
             <template v-if="type === 'labeled'">
+              <option value="createdAt">Creation Date</option>
               <option value="alpha">Alphabetical</option>
             </template>
             <template v-else>
@@ -49,7 +50,7 @@ export default {
   data() {
     return {
       showControls: false,
-      sortValue: this.type === 'labeled' ? 'alpha' : 'time',
+      sortValue: this.type === 'labeled' ? 'createdAt' : 'time',
       filters: {
         hideEmpty: false,
         showActive: false

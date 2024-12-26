@@ -181,8 +181,8 @@ export default {
       isLoading: false,
       showHelp: false,
       sortConfig: {
-        labeled: 'alpha',
-        time: 'alpha'
+        labeled: 'createdAt',
+        time: 'time'
       },
       filterConfig: {
         labeled: { hideEmpty: false, showActive: false },
@@ -279,6 +279,8 @@ export default {
     sortBucketList(buckets, sortBy) {
       return [...buckets].sort((a, b) => {
         switch (sortBy) {
+          case 'alpha':
+            return a.title.localeCompare(b.title)
           case 'time':
             return (a.max || Infinity) - (b.max || Infinity)
           case 'pending':
@@ -288,7 +290,10 @@ export default {
           case 'total':
             return b.notes.length - a.notes.length
           default:
-            return a.title.localeCompare(b.title)
+            if (a.labeled) {
+              return new Date(b.createdAt) - new Date(a.createdAt)
+            }
+            return (a.max || Infinity) - (b.max || Infinity)
         }
       })
     },

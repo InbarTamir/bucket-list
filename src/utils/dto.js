@@ -103,6 +103,7 @@ export class BucketModel {
     this.max = bucket.max || 0
     this.notes = bucket.notes || []
     this.activityRecords = bucket.activityRecords || []
+    this.createdAt = bucket.createdAt || new Date().toISOString()
   }
 
   get activityRecordsMap() {

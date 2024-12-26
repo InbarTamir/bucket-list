@@ -5,8 +5,7 @@
       bucketClass,
       {
         'has-activity': bucket.notesMap.inProgress.length > 0,
-        'is-complete': isDone,
-        'is-empty': !hasNotes
+        'is-stale': isStale
       }
     ]"
   >
@@ -82,16 +81,13 @@ export default {
     inProgressNotes() {
       return this.bucket.notesMap.inProgress
     },
-    isDone() {
+    isStale() {
       return !this.bucket.labeled && this.bucket.stats.pending === 0 && this.bucket.stats.inProgress === 0
     },
     timeEstimation() {
       if (!this.bucket.max) return null
       if (this.bucket.max === Infinity) return `∞`
       return `${this.bucket.max}m`
-    },
-    hasNotes() {
-      return this.bucket.notes.length > 0
     },
     getPendingPercent() {
       const total = this.bucket.stats.pending + this.bucket.stats.inProgress + this.bucket.stats.completed
@@ -148,10 +144,6 @@ export default {
   border: 1px solid rgba(0, 0, 0, 0.1);
   height: 100%;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.03), 0 0 0 1px rgba(0, 0, 0, 0.05);
-
-  &.is-complete {
-    opacity: 0.4;
-  }
 
   .bucket-header {
     display: flex;
@@ -285,10 +277,10 @@ export default {
 
   &.time-bucket {
     border-left: 4px solid var(--primary);
-  }
 
-  &.is-empty {
-    opacity: 0.7;
+    &.is-stale {
+      opacity: 0.4;
+    }
   }
 
   .bucket-icon {
