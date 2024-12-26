@@ -1,14 +1,5 @@
 <template>
-  <div
-    class="bucket"
-    :class="[
-      bucketClass,
-      {
-        'has-activity': bucket.notesMap.inProgress.length > 0,
-        'is-stale': isStale
-      }
-    ]"
-  >
+  <div class="bucket" :class="[bucketClass, { 'has-activity': hasActiveNotes, 'is-stale': isStale }]">
     <div class="bucket-header">
       <div class="title-area">
         <h2>{{ bucket.title }}</h2>
@@ -18,6 +9,9 @@
       <div class="actions">
         <button v-if="showAddButton" class="icon-button" @click="addNote" data-tooltip="Add Note">
           <font-awesome-icon icon="plus" />
+        </button>
+        <button v-if="bucket.labeled && !hasActiveNotes" class="icon-button danger" @click="confirmDelete" data-tooltip="Delete Bucket">
+          <font-awesome-icon icon="trash" />
         </button>
       </div>
     </div>
@@ -46,12 +40,14 @@
 
     <random-note-modal :show="showRandomModal" :bucket="bucket" :notes="pendingNotes" @close="closeRandomModal" @start="startNote" @delete="deleteNote" />
     <pick-note-modal :show="showPickModal" :bucket="bucket" :notes="pendingNotes" @close="closePickModal" @start="startNote" @delete="deleteNote" />
+    <confirm-dialog ref="confirmDialog" title="Delete Bucket" icon="triangle-exclamation" :message="`Are you sure you want to delete '${bucket.title}'? This will also delete all notes inside it.`" @confirm="deleteBucket" @cancel="$refs.confirmDialog.close()" />
   </div>
 </template>
 
 <script>
 import RandomNoteModal from './RandomNoteModal.vue'
 import PickNoteModal from './PickNoteModal.vue'
+import ConfirmDialog from './ConfirmDialog.vue'
 import { BucketModel } from '@/utils/dto'
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
 
@@ -59,7 +55,8 @@ export default {
   components: {
     RandomNoteModal,
     PickNoteModal,
-    FontAwesomeIcon
+    FontAwesomeIcon,
+    ConfirmDialog
   },
   props: {
     bucket: BucketModel,
@@ -108,6 +105,9 @@ export default {
           return acc + char.charCodeAt(0)
         }, 0) % 5
       )
+    },
+    hasActiveNotes() {
+      return this.inProgressNotes?.length > 0
     }
   },
   methods: {
@@ -131,6 +131,14 @@ export default {
     },
     deleteNote(note) {
       this.$emit('delete-note', note)
+    },
+    confirmDelete() {
+      this.$refs.confirmDialog.show()
+    },
+    deleteBucket() {
+      this.$store.dispatch('deleteBucket', this.bucket.id)
+      this.$toast.success(`Bucket "${this.bucket.title}" deleted`)
+      this.$refs.confirmDialog.close()
     }
   }
 }
@@ -169,6 +177,21 @@ export default {
         display: flex;
         align-items: center;
         gap: 0.25rem;
+      }
+    }
+
+    .actions {
+      display: flex;
+      gap: 0.5rem;
+
+      .icon-button {
+        &.danger {
+          opacity: 0.6;
+
+          &:hover {
+            opacity: 1;
+          }
+        }
       }
     }
   }

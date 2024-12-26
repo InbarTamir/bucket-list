@@ -22,6 +22,7 @@
   --special: #e680ff;
   --special-dark: #cd00ff;
   --active-number: #ff841c;
+  --warning: #ff9800;
 }
 
 * {

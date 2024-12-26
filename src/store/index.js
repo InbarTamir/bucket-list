@@ -87,6 +87,12 @@ export default new Vuex.Store({
       if (index !== -1) {
         state.activityRecords.splice(index, 1)
       }
+    },
+    deleteBucket(state, bucketId) {
+      const index = state.labeledBuckets.findIndex(bucket => bucket.id === bucketId)
+      if (index !== -1) {
+        state.labeledBuckets.splice(index, 1)
+      }
     }
   },
   actions: {
@@ -193,6 +199,18 @@ export default new Vuex.Store({
     },
     async discardNote({ commit, dispatch }, record) {
       commit('discardNote', record)
+      await dispatch('saveData')
+    },
+    async deleteBucket({ commit, dispatch, state }, bucketId) {
+      // First delete all notes in the bucket
+      const bucket = state.labeledBuckets.find(b => b.id === bucketId)
+      if (bucket) {
+        bucket.notes?.forEach(note => {
+          commit('deleteNote', note.id)
+        })
+      }
+      // Then delete the bucket itself
+      commit('deleteBucket', bucketId)
       await dispatch('saveData')
     }
   },
