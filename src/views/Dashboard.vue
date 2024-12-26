@@ -1,5 +1,8 @@
 <template>
   <div class="dashboard" role="main" :class="{ 'is-loading': isLoading }">
+    <!-- Skip link for keyboard users -->
+    <button class="skip-link" @click="focusMainContent">Skip to main content</button>
+
     <!-- Loading skeleton -->
     <div v-if="isLoading" class="skeleton-loader">
       <div class="skeleton header"></div>
@@ -46,9 +49,6 @@
           <button class="secondary" @click="showHelp = false">Got it!</button>
         </div>
       </div>
-
-      <!-- Skip link for keyboard users -->
-      <a href="#main-content" class="skip-link">Skip to main content</a>
 
       <!-- Show In Progress section at the top if there are active items -->
       <div v-if="inProgressRecords.length" class="in-progress-section" role="region" aria-label="In progress items">
@@ -200,7 +200,7 @@ export default {
       return this.buckets.filter(bucket => !bucket.labeled)
     },
     hasTimeBasedNotes() {
-      return this.timeBuckets.some(bucket => bucket.notes.length > 0)
+      return this.timeBuckets.some(bucket => bucket.notes.length > 0 || bucket.activityRecords.length > 0)
     },
     hasLabeledBuckets() {
       return this.labeledBuckets.length > 0
@@ -303,6 +303,12 @@ export default {
         if (filters.showActive && bucket.stats.inProgress === 0) return false
         return true
       })
+    },
+    focusMainContent() {
+      const mainContent = this.$el.querySelector('#main-content')
+      if (mainContent) {
+        mainContent.focus()
+      }
     }
   }
 }
@@ -321,11 +327,14 @@ export default {
     padding: 1em;
     background-color: white;
     color: var(--primary);
+    border: none;
     text-decoration: none;
 
     &:focus {
       left: 50%;
       transform: translateX(-50%);
+      outline: 2px solid var(--primary);
+      outline-offset: 2px;
     }
   }
 
